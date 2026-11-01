@@ -32,19 +32,28 @@ export function SelectorPeriodo({ anio, mes, anios, meses, onCambio, permitirAni
   );
 }
 
-export function SelectorColor({ valor, onCambio }) {
+// `usados`: colores que ya tienen otras billeteras/categorías; no se pueden elegir.
+export function SelectorColor({ valor, onCambio, usados = [] }) {
+  const tomados = new Set(usados.map((c) => String(c).toLowerCase()));
+  // Si el color actual no está en la paleta (p. ej. uno generado), se muestra igual.
+  const opciones = COLORES.includes(valor) || !valor ? COLORES : [valor, ...COLORES];
   return (
     <div className="colores">
-      {COLORES.map((c) => (
-        <button
-          key={c}
-          type="button"
-          className={`color-opcion ${valor === c ? 'activo' : ''}`}
-          style={{ background: c }}
-          onClick={() => onCambio(c)}
-          aria-label={`Color ${c}`}
-        />
-      ))}
+      {opciones.map((c) => {
+        const ocupado = tomados.has(c.toLowerCase()) && c !== valor;
+        return (
+          <button
+            key={c}
+            type="button"
+            disabled={ocupado}
+            className={`color-opcion ${valor === c ? 'activo' : ''} ${ocupado ? 'ocupado' : ''}`}
+            style={{ backgroundColor: c }}
+            onClick={() => onCambio(c)}
+            title={ocupado ? 'Ya está en uso' : undefined}
+            aria-label={ocupado ? `Color ${c} (en uso)` : `Color ${c}`}
+          />
+        );
+      })}
     </div>
   );
 }

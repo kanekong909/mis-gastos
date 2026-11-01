@@ -1,20 +1,27 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Check, X } from 'lucide-react';
+import { Plus, Check, X, WalletMinimal } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '../api';
-import { ahoraLocal, aInputFecha, COLORES, dinero } from '../utils/formato';
+import { ahoraLocal, aInputFecha, colorLibre, COLORES, dinero } from '../utils/formato';
 import { SelectorColor } from './Controles';
 import InputMonto from './InputMonto';
 import FechaHora from './FechaHora';
 
 // Lista de chips con la opción de crear uno nuevo ahí mismo.
-function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSaldo }) {
+function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSaldo, textoNinguna }) {
   const [creando, setCreando] = useState(false);
   const [nombre, setNombre] = useState('');
-  const [color, setColor] = useState(COLORES[Math.floor(Math.random() * COLORES.length)]);
+  const [color, setColor] = useState(COLORES[0]);
   const [saldo, setSaldo] = useState('');
   const [guardando, setGuardando] = useState(false);
+
+  const coloresUsados = items.map((it) => it.color);
+  // Al abrir el creador se propone un color que ninguna otra billetera/categoría use.
+  const alternarCreador = () => {
+    if (!creando) setColor(colorLibre(coloresUsados));
+    setCreando((c) => !c);
+  };
 
   const crear = async () => {
     if (!nombre.trim()) return;
@@ -33,6 +40,18 @@ function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSal
     <div className="campo">
       <label>{etiqueta}</label>
       <div className="chips">
+        {textoNinguna && (
+          <motion.button
+            layout
+            type="button"
+            className={`chip ${valor === null ? 'activo' : ''}`}
+            onClick={() => onCambio(null)}
+            whileTap={{ scale: 0.95 }}
+          >
+            <WalletMinimal size={15} className="texto-3" />
+            {textoNinguna}
+          </motion.button>
+        )}
         {items.map((it) => (
           <motion.button
             layout
@@ -48,7 +67,7 @@ function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSal
             {conSaldo && <span className="texto-3" style={{ fontWeight: 500 }}>{dinero(it.saldo)}</span>}
           </motion.button>
         ))}
-        <button type="button" className="chip chip-nuevo" onClick={() => setCreando((c) => !c)}>
+        <button type="button" className="chip chip-nuevo" onClick={alternarCreador}>
           {creando ? <X size={15} /> : <Plus size={15} />} {creando ? 'Cancelar' : 'Nueva'}
         </button>
       </div>
@@ -78,7 +97,7 @@ function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSal
                   <Check size={16} /> Crear
                 </button>
               </div>
-              <SelectorColor valor={color} onCambio={setColor} />
+              <SelectorColor valor={color} onCambio={setColor} usados={coloresUsados} />
             </div>
           </motion.div>
         )}
@@ -134,7 +153,6 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
   const enviar = async (e) => {
     e.preventDefault();
     if (!(Number(form.monto) > 0)) return toast.error('Ingresa un monto mayor a cero');
-    if (!form.billetera_id) return toast.error('Escoge una billetera');
     if (!form.categoria_id) return toast.error('Escoge una categoría');
     setGuardando(true);
     try {
@@ -175,6 +193,7 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
         onCambio={set('billetera_id')}
         onCrear={crearBilletera}
         conSaldo
+        textoNinguna="Sin billetera"
       />
       <SelectorConCreacion
         etiqueta="Categoría"

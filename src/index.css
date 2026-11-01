@@ -351,6 +351,11 @@ a { color: inherit; text-decoration: none; }
 }
 .color-opcion:hover { transform: scale(1.12); }
 .color-opcion.activo { border-color: var(--superficie); box-shadow: 0 0 0 2px var(--texto); }
+.color-opcion.ocupado {
+  opacity: .22; cursor: not-allowed; transform: none;
+  background-image: linear-gradient(135deg, transparent 45%, var(--superficie) 45%, var(--superficie) 55%, transparent 55%);
+}
+.color-opcion.ocupado:hover { transform: none; }
 
 .creador-rapido {
   display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
@@ -454,6 +459,7 @@ a { color: inherit; text-decoration: none; }
 .gasto-desc { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gasto-meta { font-size: .8rem; color: var(--texto-3); display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
 .gasto-monto { font-weight: 800; white-space: nowrap; }
+.sin-billetera { color: var(--alerta); font-weight: 700; }
 .gasto-acciones { display: flex; gap: 2px; }
 
 .grupo-dia { margin-bottom: 8px; }

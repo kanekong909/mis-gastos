@@ -18,7 +18,7 @@ function FilaGasto({ g, onEditar, onEliminar, indice = 0 }) {
       <div className="gasto-info">
         <div className="gasto-desc">{g.descripcion || g.categoria}</div>
         <div className="gasto-meta">
-          <span>{g.categoria}</span>·<span>{g.billetera}</span>·<span>{hora(g.fecha)}</span>
+          <span>{g.categoria}</span>·{g.billetera ? <span>{g.billetera}</span> : <span className="sin-billetera">Sin billetera</span>}·<span>{hora(g.fecha)}</span>
         </div>
       </div>
       <div className="gasto-monto">-{dinero(g.monto)}</div>

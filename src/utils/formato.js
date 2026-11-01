@@ -36,7 +36,33 @@ export const ahoraLocal = () => {
 export const aInputFecha = (s) => String(s).replace(' ', 'T').slice(0, 16);
 export const diaClave = (s) => String(s).slice(0, 10);
 
+// Debe coincidir con PALETA_COLORES de api/bootstrap.php.
 export const COLORES = [
-  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316', '#f59e0b',
-  '#eab308', '#84cc16', '#10b981', '#14b8a6', '#06b6d4', '#3b82f6', '#64748b',
+  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#10b981',
+  '#14b8a6', '#06b6d4', '#3b82f6', '#64748b', '#a855f7', '#d946ef', '#f43f5e', '#22c55e', '#0ea5e9',
+  '#6d28d9', '#be123c', '#b45309', '#4d7c0f', '#0f766e', '#1d4ed8',
 ];
+
+const hslAHex = (h, s, l) => {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const canal = (n) => {
+    const k = (n + h / 30) % 12;
+    const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(255 * c).toString(16).padStart(2, '0');
+  };
+  return `#${canal(0)}${canal(8)}${canal(4)}`;
+};
+
+// Primer color que no esté en `usados` (lista de colores ya tomados). Si se
+// acaba la paleta, genera colores nuevos repartidos por todo el círculo cromático.
+export function colorLibre(usados = []) {
+  const tomados = new Set(usados.map((c) => String(c).toLowerCase()));
+  const libre = COLORES.find((c) => !tomados.has(c));
+  if (libre) return libre;
+  for (let i = 0; i < 10000; i++) {
+    const c = hslAHex((i * 137.508) % 360, 65, 52);
+    if (!tomados.has(c)) return c;
+  }
+  return COLORES[0];
+}

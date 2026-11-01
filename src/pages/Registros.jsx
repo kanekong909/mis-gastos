@@ -89,7 +89,7 @@ export default function Registros() {
     return gastos.filter((g) =>
       (!q || g.descripcion.toLowerCase().includes(q) || g.categoria.toLowerCase().includes(q)) &&
       (!filtro.categoria_id || g.categoria_id === Number(filtro.categoria_id)) &&
-      (!filtro.billetera_id || g.billetera_id === Number(filtro.billetera_id))
+      (!filtro.billetera_id || (filtro.billetera_id === 'ninguna' ? g.billetera_id === null : g.billetera_id === Number(filtro.billetera_id)))
     );
   }, [gastos, filtro]);
 
@@ -163,6 +163,7 @@ export default function Registros() {
           </select>
           <select className="select select-mini" value={filtro.billetera_id} onChange={(e) => setFiltro({ ...filtro, billetera_id: e.target.value })}>
             <option value="">Todas las billeteras</option>
+            <option value="ninguna">Sin billetera</option>
             {billeteras.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
         </div>

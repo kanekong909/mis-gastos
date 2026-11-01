@@ -65,7 +65,7 @@ export function exportarGastosPDF({ titulo, subtitulo, gastos, usuario, presupue
     startY: doc.lastAutoTable.finalY + 8,
     head: [['Fecha', 'Hora', 'Descripción', 'Categoría', 'Billetera', 'Monto']],
     body: gastos.map((g) => [
-      fechaCorta(g.fecha), hora(g.fecha), g.descripcion || '—', g.categoria, g.billetera, dinero(g.monto),
+      fechaCorta(g.fecha), hora(g.fecha), g.descripcion || '—', g.categoria, g.billetera || 'Sin billetera', dinero(g.monto),
     ]),
     foot: [['', '', '', '', 'Total', dinero(total)]],
     theme: 'striped',

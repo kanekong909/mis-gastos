@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Trash2 } from 'lucide-react';
 import { api } from '../api';
-import { COLORES, dinero } from '../utils/formato';
+import { COLORES, colorLibre, dinero } from '../utils/formato';
 import Modal from './Modal';
 import { Segmentado, SelectorColor } from './Controles';
 import InputMonto from './InputMonto';
@@ -15,6 +15,8 @@ export default function ModalBilletera({ abierto, billetera, onCerrar, onGuardad
   const [ajuste, setAjuste] = useState('');
   const [tipoAjuste, setTipoAjuste] = useState('agregar');
   const [guardando, setGuardando] = useState(false);
+  // Colores de las demás billeteras: no se pueden repetir.
+  const [coloresUsados, setColoresUsados] = useState([]);
 
   useEffect(() => {
     if (!abierto) return;
@@ -22,7 +24,17 @@ export default function ModalBilletera({ abierto, billetera, onCerrar, onGuardad
     setTipoAjuste('agregar');
     setForm(billetera
       ? { nombre: billetera.nombre, saldo_inicial: String(Number(billetera.saldo_inicial)), color: billetera.color }
-      : { nombre: '', saldo_inicial: '', color: COLORES[Math.floor(Math.random() * COLORES.length)] });
+      : { nombre: '', saldo_inicial: '', color: COLORES[0] });
+
+    let vigente = true;
+    api.billeteras.listar().then((lista) => {
+      if (!vigente) return;
+      const otros = lista.filter((b) => b.id !== billetera?.id).map((b) => b.color);
+      setColoresUsados(otros);
+      // Una billetera nueva arranca con un color que nadie más tenga.
+      if (!billetera) setForm((f) => ({ ...f, color: colorLibre(otros) }));
+    }).catch(() => {});
+    return () => { vigente = false; };
   }, [abierto, billetera]);
 
   const delta = (tipoAjuste === 'retirar' ? -1 : 1) * (Number(ajuste) || 0);
@@ -95,7 +107,7 @@ export default function ModalBilletera({ abierto, billetera, onCerrar, onGuardad
         )}
         <div className="campo">
           <label>Color</label>
-          <SelectorColor valor={form.color} onCambio={(color) => setForm({ ...form, color })} />
+          <SelectorColor valor={form.color} onCambio={(color) => setForm({ ...form, color })} usados={coloresUsados} />
         </div>
         <div className="modal-pie">
           {billetera && (
