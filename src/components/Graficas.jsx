@@ -15,6 +15,7 @@ function TooltipDinero({ active, payload, etiqueta }) {
   );
 }
 
+// Tocar una barra la selecciona; tocar la barra ya seleccionada la quita (lo decide `onClickMes`).
 export function GraficaMensual({ datos, mesActivo, onClickMes }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -59,35 +60,55 @@ export function GraficaDiaria({ datos }) {
   );
 }
 
-export function GraficaCategorias({ datos }) {
+// `seleccionada` es el id de la categoría resaltada (o null). Tocar una porción o una fila de la
+// leyenda la selecciona; tocar la misma otra vez, o el centro de la dona, la quita.
+export function GraficaCategorias({ datos, seleccionada = null, onSeleccionar }) {
   const total = datos.reduce((s, d) => s + Number(d.total), 0);
   const filas = datos.map((d) => ({ ...d, total: Number(d.total) }));
+  const activa = filas.find((d) => d.id === seleccionada) || null;
+  const alternar = (id) => onSeleccionar?.(id === seleccionada ? null : id);
   return (
     <div>
       <div style={{ position: 'relative' }}>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
-            <Pie data={filas} dataKey="total" nameKey="nombre" innerRadius={62} outerRadius={90} paddingAngle={3} cornerRadius={6} stroke="none" animationDuration={800}>
-              {filas.map((d) => <Cell key={d.id} fill={d.color} />)}
+            <Pie
+              data={filas} dataKey="total" nameKey="nombre" innerRadius={62} outerRadius={90} paddingAngle={3} cornerRadius={6}
+              stroke="none" animationDuration={800} style={{ cursor: onSeleccionar ? 'pointer' : 'default', outline: 'none' }}
+              onClick={(d) => alternar(d.id)}
+            >
+              {filas.map((d) => <Cell key={d.id} fill={d.color} fillOpacity={activa && activa.id !== d.id ? 0.28 : 1} />)}
             </Pie>
             <Tooltip content={<TooltipDinero etiqueta={(p) => p.nombre} />} />
           </PieChart>
         </ResponsiveContainer>
-        <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', pointerEvents: 'none', textAlign: 'center' }}>
-          <div>
-            <div className="texto-3" style={{ fontSize: '.75rem' }}>Total</div>
-            <div className="negrita">{dineroCorto(total)}</div>
-          </div>
-        </div>
+        {/* El centro también quita la selección: es el lugar más natural donde tocar para "soltar" */}
+        <button
+          type="button"
+          className="dona-centro"
+          onClick={() => activa && onSeleccionar?.(null)}
+          disabled={!activa}
+          aria-label={activa ? `Quitar selección de ${activa.nombre}` : undefined}
+        >
+          <span className="texto-3" style={{ fontSize: '.75rem' }}>{activa ? activa.nombre : 'Total'}</span>
+          <span className="negrita">{dineroCorto(activa ? activa.total : total)}</span>
+          {activa && <span className="dona-quitar">Quitar ✕</span>}
+        </button>
       </div>
       <div className="leyenda">
         {filas.map((d) => (
-          <div className="leyenda-item" key={d.id}>
+          <button
+            type="button"
+            key={d.id}
+            className={`leyenda-item ${activa?.id === d.id ? 'activo' : ''} ${activa && activa.id !== d.id ? 'atenuado' : ''}`}
+            onClick={() => alternar(d.id)}
+            aria-pressed={activa?.id === d.id}
+          >
             <span className="punto" style={{ background: d.color }} />
             <span className="nombre">{d.nombre}</span>
             <span className="valor">{dinero(d.total)}</span>
             <span className="pct">{total ? Math.round((d.total / total) * 100) : 0}%</span>
-          </div>
+          </button>
         ))}
       </div>
     </div>

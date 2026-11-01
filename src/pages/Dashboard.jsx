@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { Wallet, CalendarDays, TrendingDown, Receipt, Plus, FileDown } from 'lucide-react';
+import { Wallet, CalendarDays, TrendingDown, Receipt, Plus, FileDown, X } from 'lucide-react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { dinero, MESES, ahoraLocal } from '../utils/formato';
@@ -42,6 +42,7 @@ export default function Dashboard() {
   const [dia, setDia] = useState(ahoraLocal().slice(0, 10));
   const [gastos, setGastos] = useState([]);
   const [modalBilletera, setModalBilletera] = useState({ abierto: false, billetera: null });
+  const [categoriaSel, setCategoriaSel] = useState(null);
 
   const cargar = useCallback(() => {
     api.dashboard(periodo.anio, periodo.mes).then(setDatos).catch((e) => toast.error(e.message));
@@ -49,10 +50,14 @@ export default function Dashboard() {
 
   useEffect(cargar, [cargar]);
 
+  // La categoría seleccionada solo vale si existe en el periodo que se está viendo.
+  const categoriaActiva = datos?.por_categoria.find((c) => c.id === categoriaSel) || null;
+  const categoriaId = categoriaActiva?.id;
+
   useEffect(() => {
     const params = vista === 'dia' ? { dia } : { anio: periodo.anio, mes: periodo.mes || undefined };
-    api.gastos.listar(params).then(setGastos).catch((e) => toast.error(e.message));
-  }, [vista, dia, periodo]);
+    api.gastos.listar({ ...params, categoria_id: categoriaId }).then(setGastos).catch((e) => toast.error(e.message));
+  }, [vista, dia, periodo, categoriaId]);
 
   const nombrePeriodo = periodo.mes ? `${MESES[periodo.mes - 1]} ${periodo.anio}` : `Año ${periodo.anio}`;
 
@@ -155,13 +160,36 @@ export default function Dashboard() {
         <motion.div className="tarjeta" {...aparecer(2)}>
           <div className="tarjeta-cab">
             <h2>Gastos por mes · {periodo.anio}</h2>
-            <span className="sub">Toca una barra para ver ese mes</span>
+            {periodo.mes > 0 ? (
+              <button className="chip-quitar" onClick={() => setPeriodo((p) => ({ ...p, mes: 0 }))} title="Ver todo el año">
+                {MESES[periodo.mes - 1]} <X size={14} />
+              </button>
+            ) : (
+              <span className="sub">Toca una barra para ver ese mes</span>
+            )}
           </div>
-          <GraficaMensual datos={datos.por_mes} mesActivo={periodo.mes} onClickMes={(mes) => mesesDe(periodo.anio).includes(mes) && setPeriodo((p) => ({ ...p, mes }))} />
+          <GraficaMensual
+            datos={datos.por_mes}
+            mesActivo={periodo.mes}
+            onClickMes={(mes) => {
+              // Tocar la barra seleccionada la quita (vuelve a todo el año).
+              if (mes === periodo.mes) return setPeriodo((p) => ({ ...p, mes: 0 }));
+              if (mesesDe(periodo.anio).includes(mes)) setPeriodo((p) => ({ ...p, mes }));
+            }}
+          />
         </motion.div>
         <motion.div className="tarjeta" {...aparecer(3)}>
-          <div className="tarjeta-cab"><h2>Por categoría</h2></div>
-          {datos.por_categoria.length ? <GraficaCategorias datos={datos.por_categoria} /> : <SinGastos />}
+          <div className="tarjeta-cab">
+            <h2>Por categoría</h2>
+            {categoriaActiva ? (
+              <button className="chip-quitar" onClick={() => setCategoriaSel(null)} title="Quitar selección">
+                <span className="punto" style={{ background: categoriaActiva.color }} />{categoriaActiva.nombre} <X size={14} />
+              </button>
+            ) : datos.por_categoria.length > 0 && <span className="sub">Toca una para filtrar</span>}
+          </div>
+          {datos.por_categoria.length
+            ? <GraficaCategorias datos={datos.por_categoria} seleccionada={categoriaActiva?.id ?? null} onSeleccionar={setCategoriaSel} />
+            : <SinGastos />}
         </motion.div>
       </div>
 
@@ -190,8 +218,16 @@ export default function Dashboard() {
 
       <motion.div className="tarjeta" {...aparecer(6)}>
         <div className="tarjeta-cab">
-          <h2>Gastos</h2>
+          <h2>
+            Gastos
+            {categoriaActiva && <span className="texto-3" style={{ fontWeight: 500 }}> · {categoriaActiva.nombre}</span>}
+          </h2>
           <div className="acciones">
+            {categoriaActiva && (
+              <button className="chip-quitar" onClick={() => setCategoriaSel(null)} title="Quitar filtro">
+                <span className="punto" style={{ background: categoriaActiva.color }} />{categoriaActiva.nombre} <X size={14} />
+              </button>
+            )}
             {vista === 'dia' && <input type="date" className="input select-mini" value={dia} onChange={(e) => setDia(e.target.value)} />}
             <Segmentado
               valor={vista}
