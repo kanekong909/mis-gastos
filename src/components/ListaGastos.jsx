@@ -16,9 +16,15 @@ function FilaGasto({ g, onEditar, onEliminar, indice = 0 }) {
         {g.categoria?.[0]}
       </div>
       <div className="gasto-info">
-        <div className="gasto-desc">{g.descripcion || g.categoria}</div>
+        {g.descripcion
+          ? <div className="gasto-desc">{g.descripcion}</div>
+          : <div className="gasto-desc gasto-desc-vacia">Sin descripción</div>}
         <div className="gasto-meta">
-          <span>{g.categoria}</span>·{g.billetera ? <span>{g.billetera}</span> : <span className="sin-billetera">Sin billetera</span>}·<span>{hora(g.fecha)}</span>
+          <span className="etiqueta" style={{ '--punto': g.categoria_color }}>{g.categoria}</span>
+          {g.billetera
+            ? <span className="etiqueta" style={{ '--punto': g.billetera_color }}>{g.billetera}</span>
+            : <span className="etiqueta etiqueta-alerta">Sin billetera</span>}
+          <span className="gasto-hora">{hora(g.fecha)}</span>
         </div>
       </div>
       <div className="gasto-monto">-{dinero(g.monto)}</div>
