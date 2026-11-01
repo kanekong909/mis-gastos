@@ -7,7 +7,7 @@ export function Segmentado({ opciones, valor, onCambio }) {
   return (
     <div className="segmentado">
       {opciones.map((o) => (
-        <button key={o.valor} className={valor === o.valor ? 'activo' : ''} onClick={() => onCambio(o.valor)}>
+        <button key={o.valor} type="button" className={valor === o.valor ? 'activo' : ''} onClick={() => onCambio(o.valor)}>
           {valor === o.valor && <motion.span layoutId={`seg-${id}`} className="seg-fondo" transition={{ type: 'spring', stiffness: 450, damping: 35 }} />}
           <span>{o.etiqueta}</span>
         </button>

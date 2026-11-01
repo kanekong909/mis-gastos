@@ -4,29 +4,35 @@ import { Trash2 } from 'lucide-react';
 import { api } from '../api';
 import { COLORES, dinero } from '../utils/formato';
 import Modal from './Modal';
-import { SelectorColor } from './Controles';
+import { Segmentado, SelectorColor } from './Controles';
 import InputMonto from './InputMonto';
 
-// Crear o editar una billetera. El saldo inicial es lo que tenías antes de
-// registrar gastos; "Agregar dinero" lo incrementa (recargas, salario, etc.).
+// Crear o editar una billetera. El saldo de una billetera es su saldo inicial
+// menos los gastos; agregar o retirar dinero a mano mueve el saldo inicial
+// (recargas, salario, retiros, efectivo que sacaste, etc.).
 export default function ModalBilletera({ abierto, billetera, onCerrar, onGuardado }) {
   const [form, setForm] = useState({ nombre: '', saldo_inicial: '', color: COLORES[0] });
-  const [recarga, setRecarga] = useState('');
+  const [ajuste, setAjuste] = useState('');
+  const [tipoAjuste, setTipoAjuste] = useState('agregar');
   const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
     if (!abierto) return;
-    setRecarga('');
+    setAjuste('');
+    setTipoAjuste('agregar');
     setForm(billetera
       ? { nombre: billetera.nombre, saldo_inicial: String(Number(billetera.saldo_inicial)), color: billetera.color }
       : { nombre: '', saldo_inicial: '', color: COLORES[Math.floor(Math.random() * COLORES.length)] });
   }, [abierto, billetera]);
 
+  const delta = (tipoAjuste === 'retirar' ? -1 : 1) * (Number(ajuste) || 0);
+  const nuevoSaldo = billetera ? Number(billetera.saldo) + delta : null;
+
   const guardar = async (e) => {
     e.preventDefault();
     setGuardando(true);
     try {
-      const datos = { ...form, saldo_inicial: (Number(form.saldo_inicial) || 0) + (Number(recarga) || 0) };
+      const datos = { ...form, saldo_inicial: (Number(form.saldo_inicial) || 0) + delta };
       if (billetera) await api.billeteras.editar(billetera.id, datos);
       else await api.billeteras.crear(datos);
       toast.success(billetera ? 'Billetera actualizada' : 'Billetera creada');
@@ -63,18 +69,30 @@ export default function ModalBilletera({ abierto, billetera, onCerrar, onGuardad
           <label>Nombre</label>
           <input className="input" required value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Nequi, Bancolombia, Efectivo" />
         </div>
-        <div className="fila-campos">
+        {billetera ? (
+          <div className="campo">
+            <label>Ajustar saldo</label>
+            <div className="ajuste-saldo">
+              <Segmentado
+                valor={tipoAjuste}
+                onCambio={setTipoAjuste}
+                opciones={[{ valor: 'agregar', etiqueta: 'Agregar' }, { valor: 'retirar', etiqueta: 'Retirar' }]}
+              />
+              <InputMonto value={ajuste} onChange={setAjuste} placeholder={tipoAjuste === 'retirar' ? '− 0' : '+ 0'} />
+            </div>
+            {delta !== 0 && (
+              <span className="texto-2" style={{ fontSize: '.88rem' }}>
+                Nuevo saldo:{' '}
+                <b style={{ color: nuevoSaldo < 0 ? 'var(--peligro)' : 'var(--texto)' }}>{dinero(nuevoSaldo)}</b>
+              </span>
+            )}
+          </div>
+        ) : (
           <div className="campo">
             <label>Saldo inicial</label>
             <InputMonto value={form.saldo_inicial} onChange={(saldo_inicial) => setForm({ ...form, saldo_inicial })} placeholder="0" />
           </div>
-          {billetera && (
-            <div className="campo">
-              <label>Agregar dinero</label>
-              <InputMonto value={recarga} onChange={setRecarga} placeholder="+ 0" />
-            </div>
-          )}
-        </div>
+        )}
         <div className="campo">
           <label>Color</label>
           <SelectorColor valor={form.color} onCambio={(color) => setForm({ ...form, color })} />
