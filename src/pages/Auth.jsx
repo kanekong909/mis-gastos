@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Mail, Lock, User, Wallet, TrendingDown, PieChart } from 'lucide-react';
+import { Mail, Lock, User, Wallet, TrendingDown, PieChart, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { BotonTema } from '../components/Layout';
 import SelectorAcento from '../components/SelectorAcento';
@@ -9,6 +9,7 @@ export default function Auth() {
   const { login, registro } = useAuth();
   const [modo, setModo] = useState('login');
   const [form, setForm] = useState({ nombre: '', email: '', password: '' });
+  const [verPassword, setVerPassword] = useState(false);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const esRegistro = modo === 'registro';
@@ -83,7 +84,17 @@ export default function Auth() {
             <label>Contraseña</label>
             <div className="input-icono">
               <Lock size={18} />
-              <input className="input" type="password" required minLength={esRegistro ? 6 : undefined} {...campo('password')} placeholder={esRegistro ? 'Mínimo 6 caracteres' : '••••••••'} autoComplete={esRegistro ? 'new-password' : 'current-password'} />
+              <input className="input input-con-ojo" type={verPassword ? 'text' : 'password'} required minLength={esRegistro ? 6 : undefined} {...campo('password')} placeholder={esRegistro ? 'Mínimo 6 caracteres' : '••••••••'} autoComplete={esRegistro ? 'new-password' : 'current-password'} />
+              <button
+                type="button"
+                className="btn-ojo"
+                onClick={() => setVerPassword((v) => !v)}
+                aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-pressed={verPassword}
+                title={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {verPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
