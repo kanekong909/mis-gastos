@@ -55,6 +55,8 @@ export const api = {
   gastos: {
     ...recurso('gastos.php'),
     resumenAnios: () => peticion('gastos.php', { params: { resumen: 'anios' } }),
+    sugerir: (texto) => peticion('gastos.php', { params: { sugerir: texto } }),
+    recientes: () => peticion('gastos.php', { params: { recientes: 1 } }),
   },
   presupuestos: {
     ...recurso('presupuestos.php'),

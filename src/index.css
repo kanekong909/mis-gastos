@@ -369,6 +369,42 @@ a { color: inherit; text-decoration: none; }
 .ajuste-saldo { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .ajuste-saldo .input { flex: 1 1 140px; width: auto; }
 
+/* ---------- Autocompletar descripción ---------- */
+.autocompletar { position: relative; }
+.sugerencias {
+  position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; right: 0;
+  list-style: none; margin: 0; padding: 6px;
+  max-height: 290px; overflow-y: auto;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  box-shadow: var(--sombra-fuerte);
+}
+.sugerencia {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px;
+  cursor: pointer;
+}
+.sugerencia.activa { background: var(--primario-suave); }
+.sugerencia-texto { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--texto-2); }
+.sugerencia-texto strong { color: var(--texto); font-weight: 800; }
+.sugerencia-veces { font-size: .75rem; white-space: nowrap; }
+.sugerencia .etiqueta { flex-shrink: 0; max-width: 40%; }
+
+/* ---------- Sugerencia de mes ---------- */
+.sugerencia-fecha {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-top: 12px; padding: 12px 14px; overflow: hidden;
+  background: var(--primario-suave);
+  border: 1px solid color-mix(in srgb, var(--primario) 30%, transparent);
+  border-radius: var(--radio-sm);
+}
+.sugerencia-fecha-icono { color: var(--primario); flex-shrink: 0; }
+.sugerencia-fecha-texto { flex: 1 1 200px; display: flex; flex-direction: column; gap: 2px; font-size: .88rem; }
+.sugerencia-fecha-texto span { color: var(--texto-2); font-size: .8rem; }
+.sugerencia-fecha-botones { display: flex; gap: 8px; }
+.sugerencia-fecha-botones .btn { padding: 8px 14px; font-size: .85rem; }
+
 /* ---------- Editar categorías ---------- */
 .campo-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .campo-cab .btn-link { display: inline-flex; align-items: center; gap: 5px; }

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Check, X, WalletMinimal, Pencil } from 'lucide-react';
+import { Plus, Check, X, WalletMinimal, Pencil, CalendarClock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '../api';
 import { ahoraLocal, aInputFecha, colorLibre, COLORES, dinero } from '../utils/formato';
@@ -8,6 +8,8 @@ import { SelectorColor } from './Controles';
 import InputMonto from './InputMonto';
 import FechaHora from './FechaHora';
 import ModalCategorias from './ModalCategorias';
+import InputDescripcion from './InputDescripcion';
+import { sugerirFecha } from '../utils/sugerirFecha';
 
 // Lista de chips con la opción de crear uno nuevo ahí mismo.
 function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSaldo, textoNinguna, onGestionar }) {
@@ -124,6 +126,9 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
   }));
   const [guardando, setGuardando] = useState(false);
   const [gestionando, setGestionando] = useState(false);
+  // Para sugerir el mes: últimos gastos ingresados y los meses que el usuario ya rechazó.
+  const [recientes, setRecientes] = useState([]);
+  const [rechazadas, setRechazadas] = useState([]);
 
   const cargar = async () => {
     const [b, c] = await Promise.all([api.billeteras.listar(), api.categorias.listar()]);
@@ -132,7 +137,12 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
     return [b, c];
   };
 
+  const cargarRecientes = () => {
+    if (!inicial) api.gastos.recientes().then(setRecientes).catch(() => {});
+  };
+
   useEffect(() => {
+    cargarRecientes();
     cargar()
       .then(([b]) => {
         // Preselecciona la primera billetera para agilizar el registro.
@@ -143,6 +153,18 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
   }, []);
 
   const set = (campo) => (v) => setForm((f) => ({ ...f, [campo]: v }));
+
+  // Al elegir una descripción anterior, si aún no hay categoría se usa la que tenía.
+  const elegirSugerencia = (s) => {
+    setForm((f) => (f.categoria_id || !categorias.some((c) => c.id === s.categoria_id) ? f : { ...f, categoria_id: s.categoria_id }));
+  };
+
+  // Mes sugerido (solo al registrar, no al editar), salvo que ya se haya dicho que no.
+  const sugerenciaFecha = useMemo(() => {
+    if (inicial) return null;
+    const sug = sugerirFecha({ descripcion: form.descripcion, fechaForm: form.fecha, recientes });
+    return sug && !rechazadas.includes(sug.clave) ? sug : null;
+  }, [inicial, form.descripcion, form.fecha, recientes, rechazadas]);
 
   const crearBilletera = async (datos) => {
     const r = await api.billeteras.crear(datos);
@@ -170,6 +192,7 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
       if (!inicial) {
         setForm((f) => ({ ...f, monto: '', descripcion: '', fecha: ahoraLocal() }));
         cargar();
+        cargarRecientes();
       }
       onGuardado?.();
     } catch (err) {
@@ -214,11 +237,46 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
 
       <div className="campo">
         <label htmlFor="desc">Descripción</label>
-        <input id="desc" className="input" placeholder="Ej: almuerzo, taxi, mercado…" maxLength={255} value={form.descripcion} onChange={(e) => set('descripcion')(e.target.value)} />
+        <InputDescripcion
+          id="desc"
+          placeholder="Ej: almuerzo, taxi, mercado…"
+          maxLength={255}
+          value={form.descripcion}
+          onChange={set('descripcion')}
+          onElegir={elegirSugerencia}
+        />
       </div>
       <div className="campo">
         <label>Fecha y hora</label>
         <FechaHora value={form.fecha} onChange={set('fecha')} />
+        <AnimatePresence>
+          {sugerenciaFecha && (
+            <motion.div
+              className="sugerencia-fecha"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <CalendarClock size={20} className="sugerencia-fecha-icono" />
+              <div className="sugerencia-fecha-texto">
+                <strong>¿Este registro es de {sugerenciaFecha.etiqueta}?</strong>
+                <span>
+                  {sugerenciaFecha.motivo === 'descripcion'
+                    ? 'Lo mencionas en la descripción.'
+                    : 'Tus últimos registros son de ese mes.'}
+                </span>
+              </div>
+              <div className="sugerencia-fecha-botones">
+                <button type="button" className="btn btn-primario" onClick={() => set('fecha')(sugerenciaFecha.fecha)}>
+                  Usar {sugerenciaFecha.diaTexto}
+                </button>
+                <button type="button" className="btn btn-secundario" onClick={() => setRechazadas((r) => [...r, sugerenciaFecha.clave])}>
+                  No
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <button className="btn btn-primario btn-bloque" disabled={guardando}>
