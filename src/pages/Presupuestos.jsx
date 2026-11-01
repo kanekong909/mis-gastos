@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { Plus, Copy, Pencil, Trash2, PiggyBank, AlertTriangle } from 'lucide-react';
+import { Plus, Copy, Pencil, Trash2, PiggyBank, AlertTriangle, Tags } from 'lucide-react';
 import { api } from '../api';
 import { dinero, MESES } from '../utils/formato';
 import { SelectorPeriodo, listaAnios } from '../components/Controles';
 import Modal, { Confirmar } from '../components/Modal';
 import InputMonto from '../components/InputMonto';
+import ModalCategorias from '../components/ModalCategorias';
 
 function Anillo({ pct, color }) {
   const r = 38;
@@ -44,6 +45,7 @@ export default function Presupuestos() {
   const [modal, setModal] = useState({ abierto: false, item: null });
   const [form, setForm] = useState({ categoria_id: '', monto: '' });
   const [eliminando, setEliminando] = useState(null);
+  const [gestionando, setGestionando] = useState(false);
 
   const cargar = useCallback(() => {
     api.presupuestos.listar(periodo).then(setLista).catch((e) => toast.error(e.message));
@@ -109,6 +111,7 @@ export default function Presupuestos() {
         <div className="acciones">
           <SelectorPeriodo anio={periodo.anio} mes={periodo.mes} anios={listaAnios([periodo.anio + 1])} onCambio={(anio, mes) => setPeriodo({ anio, mes })} />
           <button className="btn btn-secundario" onClick={copiarAnterior} title="Copiar presupuestos del mes anterior"><Copy size={16} /> Copiar mes anterior</button>
+          <button className="btn btn-secundario" onClick={() => setGestionando(true)}><Tags size={16} /> Categorías</button>
           <button className="btn btn-primario" onClick={() => abrir()} disabled={!disponibles.length}><Plus size={17} /> Nuevo</button>
         </div>
       </div>
@@ -218,6 +221,12 @@ export default function Presupuestos() {
           </div>
         </form>
       </Modal>
+
+      <ModalCategorias
+        abierto={gestionando}
+        onCerrar={() => setGestionando(false)}
+        onCambio={() => { cargar(); api.categorias.listar().then(setCategorias).catch(() => {}); }}
+      />
 
       <Confirmar
         abierto={!!eliminando}

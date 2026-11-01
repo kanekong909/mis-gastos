@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Check, X, WalletMinimal } from 'lucide-react';
+import { Plus, Check, X, WalletMinimal, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '../api';
 import { ahoraLocal, aInputFecha, colorLibre, COLORES, dinero } from '../utils/formato';
 import { SelectorColor } from './Controles';
 import InputMonto from './InputMonto';
 import FechaHora from './FechaHora';
+import ModalCategorias from './ModalCategorias';
 
 // Lista de chips con la opción de crear uno nuevo ahí mismo.
-function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSaldo, textoNinguna }) {
+function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSaldo, textoNinguna, onGestionar }) {
   const [creando, setCreando] = useState(false);
   const [nombre, setNombre] = useState('');
   const [color, setColor] = useState(COLORES[0]);
@@ -38,7 +39,12 @@ function SelectorConCreacion({ etiqueta, items, valor, onCambio, onCrear, conSal
 
   return (
     <div className="campo">
-      <label>{etiqueta}</label>
+      <div className="campo-cab">
+        <label>{etiqueta}</label>
+        {onGestionar && (
+          <button type="button" className="btn-link" onClick={onGestionar}><Pencil size={13} /> Editar</button>
+        )}
+      </div>
       <div className="chips">
         {textoNinguna && (
           <motion.button
@@ -117,6 +123,7 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
     descripcion: inicial?.descripcion ?? '',
   }));
   const [guardando, setGuardando] = useState(false);
+  const [gestionando, setGestionando] = useState(false);
 
   const cargar = async () => {
     const [b, c] = await Promise.all([api.billeteras.listar(), api.categorias.listar()]);
@@ -201,7 +208,9 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
         valor={form.categoria_id}
         onCambio={set('categoria_id')}
         onCrear={crearCategoria}
+        onGestionar={() => setGestionando(true)}
       />
+      <ModalCategorias abierto={gestionando} onCerrar={() => setGestionando(false)} onCambio={cargar} />
 
       <div className="campo">
         <label htmlFor="desc">Descripción</label>
