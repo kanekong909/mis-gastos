@@ -79,7 +79,9 @@ export function GraficaCategorias({ datos, seleccionada = null, onSeleccionar })
             >
               {filas.map((d) => <Cell key={d.id} fill={d.color} fillOpacity={activa && activa.id !== d.id ? 0.28 : 1} />)}
             </Pie>
-            <Tooltip content={<TooltipDinero etiqueta={(p) => p.nombre} />} />
+            {/* Con una categoría seleccionada el centro ya muestra su monto: el globo del tooltip
+                (que en el celular se queda pegado al tocar) se encimaba con ese texto. */}
+            {!activa && <Tooltip content={<TooltipDinero etiqueta={(p) => p.nombre} />} wrapperStyle={{ outline: 'none', zIndex: 5 }} />}
           </PieChart>
         </ResponsiveContainer>
         {/* El centro también quita la selección: es el lugar más natural donde tocar para "soltar" */}
