@@ -5,6 +5,7 @@ import { api } from '../api';
 import { ahoraLocal } from '../utils/formato';
 import FormGasto from '../components/FormGasto';
 import ListaGastos from '../components/ListaGastos';
+import AtajosRapidos from '../components/AtajosRapidos';
 
 export default function NuevoGasto() {
   const [deHoy, setDeHoy] = useState([]);
@@ -20,6 +21,8 @@ export default function NuevoGasto() {
           <p>Anota lo que gastaste; si la billetera o categoría no existe, créala aquí mismo.</p>
         </div>
       </div>
+
+      <AtajosRapidos onRegistrado={cargarHoy} />
 
       <div className="rejilla rejilla-3-1">
         <motion.div className="tarjeta" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>

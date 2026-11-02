@@ -58,6 +58,10 @@ export const api = {
     sugerir: (texto) => peticion('gastos.php', { params: { sugerir: texto } }),
     recientes: () => peticion('gastos.php', { params: { recientes: 1 } }),
   },
+  atajos: {
+    ...recurso('atajos.php'),
+    usar: (id, fecha) => peticion('atajos.php', { method: 'POST', body: { fecha }, params: { accion: 'usar', id } }),
+  },
   presupuestos: {
     ...recurso('presupuestos.php'),
     copiar: (body) => peticion('presupuestos.php', { method: 'POST', body, params: { accion: 'copiar' } }),

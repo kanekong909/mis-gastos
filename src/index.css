@@ -429,6 +429,40 @@ a { color: inherit; text-decoration: none; }
 .sugerencia-fecha-botones { display: flex; gap: 8px; }
 .sugerencia-fecha-botones .btn { padding: 8px 14px; font-size: .85rem; }
 
+/* ---------- Atajos de registro rápido ---------- */
+.atajos { margin-bottom: 18px; }
+.atajos-lista { display: flex; flex-wrap: wrap; gap: 10px; }
+.atajo {
+  display: flex; align-items: center; gap: 10px; text-align: left;
+  padding: 10px 14px; border-radius: var(--radio-sm);
+  background: var(--superficie-2);
+  border: 1.5px solid transparent;
+  transition: border-color var(--transicion), transform .15s, background var(--transicion);
+}
+.atajo:hover:not(:disabled) { border-color: var(--primario); }
+.atajo:active:not(:disabled) { transform: scale(.97); }
+.atajo:disabled { opacity: .6; cursor: progress; }
+.atajo-icono {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center; font-weight: 800; font-size: .9rem;
+}
+.atajo-texto { display: flex; flex-direction: column; min-width: 0; }
+.atajo-nombre { font-weight: 700; font-size: .9rem; display: flex; align-items: center; gap: 6px; }
+.atajo-veces { font-size: .72rem; font-weight: 800; color: var(--primario); background: var(--primario-suave); border-radius: 999px; padding: 1px 7px; }
+.atajo-monto { font-size: .78rem; color: var(--texto-3); font-weight: 600; }
+.atajos-vacio { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--texto-3); font-size: .9rem; }
+.atajos-cab-acciones { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.atajo-fila { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); }
+.atajo-fila:last-child { border-bottom: none; }
+.atajo-fila .atajo-texto { flex: 1; }
+.atajo-form { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }
+.contador { display: inline-flex; align-items: center; gap: 4px; border: 1.5px solid var(--borde); border-radius: var(--radio-sm); padding: 3px; width: fit-content; }
+.contador button { width: 34px; height: 34px; border-radius: 9px; font-size: 1.2rem; font-weight: 700; color: var(--texto-2); }
+.contador button:hover:not(:disabled) { background: var(--superficie-2); color: var(--texto); }
+.contador button:disabled { opacity: .35; cursor: default; }
+.contador span { min-width: 34px; text-align: center; font-weight: 800; }
+
 /* ---------- Editar categorías ---------- */
 .campo-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .campo-cab .btn-link { display: inline-flex; align-items: center; gap: 5px; }
@@ -831,4 +865,32 @@ a { color: inherit; text-decoration: none; }
 
   .auth-form h1 { font-size: 1.6rem; }
   .auth-form h1 + .sub { margin-bottom: 20px; }
+}
+
+/* Aviso "registrado" con botón Deshacer */
+.toast-deshacer {
+  display: flex; align-items: center; gap: 14px; justify-content: space-between;
+  max-width: min(92vw, 420px); padding: 10px 12px 10px 16px;
+  background: var(--superficie); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 14px;
+  box-shadow: var(--sombra-fuerte); font-size: .9rem;
+}
+.toast-deshacer.entra { animation: entra-toast .22s ease-out; }
+.toast-deshacer.sale { opacity: 0; transition: opacity .2s; }
+.toast-deshacer button {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  padding: 7px 11px; border-radius: 10px;
+  background: var(--primario-suave); color: var(--primario); font-weight: 700; font-size: .82rem;
+}
+@keyframes entra-toast { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 640px) {
+  /* Atajos de registro rápido: dos por fila para no empujar el formulario hacia abajo */
+  .atajos-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .atajo { padding: 9px 10px; gap: 8px; min-width: 0; }
+  .atajo-icono { width: 28px; height: 28px; border-radius: 8px; font-size: .78rem; }
+  .atajo-nombre { font-size: .84rem; }
+  .atajo-texto { overflow: hidden; }
+  /* El nombre se parte en dos líneas en vez de cortarse con "…" */
+  .atajo-nombre { flex-wrap: wrap; gap: 0 6px; line-height: 1.25; word-break: break-word; }
 }
