@@ -149,7 +149,7 @@ export default function Registros() {
             <h2>{nombrePeriodo}</h2>
             <span className="sub">{filtrados.length} gasto(s) · {dinero(total)}</span>
           </div>
-          <button className="btn btn-secundario" onClick={descargarPDF}><FileDown size={17} /> Descargar PDF</button>
+          <button className="btn btn-secundario" onClick={descargarPDF}><FileDown size={17} /> <span className="solo-escritorio">Descargar </span>PDF</button>
         </div>
 
         <div className="filtros">

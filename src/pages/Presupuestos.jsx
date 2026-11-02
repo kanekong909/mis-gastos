@@ -110,7 +110,7 @@ export default function Presupuestos() {
         </div>
         <div className="acciones">
           <SelectorPeriodo anio={periodo.anio} mes={periodo.mes} anios={listaAnios([periodo.anio + 1])} onCambio={(anio, mes) => setPeriodo({ anio, mes })} />
-          <button className="btn btn-secundario" onClick={copiarAnterior} title="Copiar presupuestos del mes anterior"><Copy size={16} /> Copiar mes anterior</button>
+          <button className="btn btn-secundario" onClick={copiarAnterior} title="Copiar presupuestos del mes anterior"><Copy size={16} /> Copiar<span className="solo-escritorio"> mes anterior</span></button>
           <button className="btn btn-secundario" onClick={() => setGestionando(true)}><Tags size={16} /> Categorías</button>
           <button className="btn btn-primario" onClick={() => abrir()} disabled={!disponibles.length}><Plus size={17} /> Nuevo</button>
         </div>
@@ -143,7 +143,7 @@ export default function Presupuestos() {
             <span>No tienes presupuestos para {MESES[periodo.mes - 1]} {periodo.anio}</span>
             <div className="acciones" style={{ justifyContent: 'center' }}>
               <button className="btn btn-primario" onClick={() => abrir()}><Plus size={16} /> Crear presupuesto</button>
-              <button className="btn btn-secundario" onClick={copiarAnterior}><Copy size={16} /> Copiar mes anterior</button>
+              <button className="btn btn-secundario" onClick={copiarAnterior}><Copy size={16} /> Copiar<span className="solo-escritorio"> mes anterior</span></button>
             </div>
           </div>
         </div>

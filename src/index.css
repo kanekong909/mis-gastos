@@ -783,3 +783,52 @@ a { color: inherit; text-decoration: none; }
 .texto-2 { color: var(--texto-2); }
 .texto-3 { color: var(--texto-3); }
 .negrita { font-weight: 700; }
+
+/* ---------- Celular: menos texto, más aire ----------
+   Se quitan frases de ayuda y notas secundarias, se acortan botones y se bajan
+   los tamaños. Nada de lo que se oculta es un dato: los montos, nombres y
+   etiquetas siguen a la vista. */
+.solo-escritorio { }
+@media (max-width: 640px) {
+  .solo-escritorio,
+  .pista,
+  .encabezado p,
+  .stat .nota,
+  .billetera .nota,
+  .auth-form .sub,
+  .sugerencia-fecha-texto span { display: none; }
+
+  .contenido { padding-top: 8px; }
+  .encabezado { margin-bottom: 16px; gap: 10px; }
+  .encabezado h1 { font-size: 1.35rem; }
+
+  .tarjeta { padding: 16px; border-radius: 16px; }
+  .tarjeta h2 { font-size: .95rem; }
+  .tarjeta-cab { margin-bottom: 12px; }
+
+  .stat .etq { font-size: .76rem; gap: 6px; }
+  .stat .icono-burbuja { width: 28px; height: 28px; border-radius: 8px; }
+  .stat .icono-burbuja svg { width: 15px; height: 15px; }
+  .stat .valor { font-size: 1.15rem; }
+  .rejilla-stats { gap: 10px; }
+
+  .billetera { min-width: 160px; flex-basis: 160px; padding: 14px; }
+  .billetera .nombre { font-size: .85rem; }
+  .billetera .saldo { font-size: 1.15rem; margin-top: 12px; }
+
+  .gasto-desc { font-size: .92rem; }
+  .grupo-dia-cab { font-size: .76rem; padding: 10px 2px 4px; }
+
+  .campo label { font-size: .78rem; }
+  .btn { font-size: .88rem; padding: 9px 14px; }
+  .chip { font-size: .82rem; padding: 8px 12px; }
+  /* 16px en los campos evita el zoom automático de iPhone al enfocarlos */
+  .input, .select, .textarea { font-size: 16px; }
+  .select-mini { font-size: .88rem; }
+
+  .leyenda-item { font-size: .84rem; }
+  .presupuesto-pie { font-size: .74rem; }
+
+  .auth-form h1 { font-size: 1.6rem; }
+  .auth-form h1 + .sub { margin-bottom: 20px; }
+}

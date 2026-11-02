@@ -18,9 +18,9 @@ const aparecer = (i) => ({
   transition: { delay: i * 0.05, duration: 0.35 },
 });
 
-function Stat({ icono: Icono, etiqueta, valor, nota, color, destacada, i }) {
+function Stat({ icono: Icono, etiqueta, valor, nota, color, destacada, i, soloEscritorio }) {
   return (
-    <motion.div className={`tarjeta stat ${destacada ? 'stat-destacada' : ''}`} {...aparecer(i)}>
+    <motion.div className={`tarjeta stat ${destacada ? 'stat-destacada' : ''} ${soloEscritorio ? 'solo-escritorio' : ''}`} {...aparecer(i)}>
       <span className="etq">
         <span className="icono-burbuja" style={{ background: destacada ? 'rgba(255,255,255,.18)' : `${color}1f`, color: destacada ? 'white' : color }}>
           <Icono size={18} />
@@ -125,7 +125,7 @@ export default function Dashboard() {
       <div className="tarjeta mb">
         <div className="tarjeta-cab">
           <h2>Mis billeteras</h2>
-          <span className="sub">Toca una para editarla o agregar dinero</span>
+          <span className="sub pista">Toca una para editarla o agregar dinero</span>
         </div>
         <div className="billeteras">
           {datos.billeteras.map((b, i) => (
@@ -153,7 +153,7 @@ export default function Dashboard() {
         <Stat i={0} destacada icono={Wallet} etiqueta="Saldo total" valor={dinero(datos.saldo_total)} nota={`${datos.billeteras.length} billetera(s)`} />
         <Stat i={1} icono={TrendingDown} color="#ef4444" etiqueta={periodo.mes ? 'Gastado en el mes' : 'Gastado en el año'} valor={dinero(t.total)} nota={`Promedio diario ${dinero(t.total / Math.max(1, diasTranscurridos))}`} />
         <Stat i={2} icono={CalendarDays} color="#f59e0b" etiqueta="Gastado hoy" valor={dinero(datos.hoy.total)} nota={`${datos.hoy.cantidad} gasto(s) hoy`} />
-        <Stat i={3} icono={Receipt} color="#10b981" etiqueta="Registros" valor={t.cantidad} nota={`Mayor gasto ${dinero(t.mayor)}`} />
+        <Stat i={3} soloEscritorio icono={Receipt} color="#10b981" etiqueta="Registros" valor={t.cantidad} nota={`Mayor gasto ${dinero(t.mayor)}`} />
       </div>
 
       <div className="rejilla rejilla-3-1 mb">
@@ -165,7 +165,7 @@ export default function Dashboard() {
                 {MESES[periodo.mes - 1]} <X size={14} />
               </button>
             ) : (
-              <span className="sub">Toca una barra para ver ese mes</span>
+              <span className="sub pista">Toca una barra para ver ese mes</span>
             )}
           </div>
           <GraficaMensual
@@ -185,7 +185,7 @@ export default function Dashboard() {
               <button className="chip-quitar" onClick={() => setCategoriaSel(null)} title="Quitar selección">
                 <span className="punto" style={{ background: categoriaActiva.color }} />{categoriaActiva.nombre} <X size={14} />
               </button>
-            ) : datos.por_categoria.length > 0 && <span className="sub">Toca una para filtrar</span>}
+            ) : datos.por_categoria.length > 0 && <span className="sub pista">Toca una para filtrar</span>}
           </div>
           {datos.por_categoria.length
             ? <GraficaCategorias datos={datos.por_categoria} seleccionada={categoriaActiva?.id ?? null} onSeleccionar={setCategoriaSel} />
@@ -196,7 +196,7 @@ export default function Dashboard() {
       <div className="rejilla rejilla-2 mb">
         {periodo.mes > 0 && (
           <motion.div className="tarjeta" {...aparecer(4)}>
-            <div className="tarjeta-cab"><h2>Evolución diaria</h2><span className="sub">{nombrePeriodo}</span></div>
+            <div className="tarjeta-cab"><h2>Evolución diaria</h2><span className="sub pista">{nombrePeriodo}</span></div>
             <GraficaDiaria datos={datos.por_dia} />
           </motion.div>
         )}
