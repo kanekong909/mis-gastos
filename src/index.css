@@ -894,3 +894,22 @@ a { color: inherit; text-decoration: none; }
   /* El nombre se parte en dos líneas en vez de cortarse con "…" */
   .atajo-nombre { flex-wrap: wrap; gap: 0 6px; line-height: 1.25; word-break: break-word; }
 }
+
+/* ---------- Botones rápidos de monto (+100, +500, …) ---------- */
+.montos-rapidos { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 12px; }
+.montos-rapidos .segmentado { background: var(--superficie); }
+.montos-rapidos .segmentado button { padding: 6px 14px; font-size: 1rem; }
+.monto-rapido {
+  padding: 8px 12px; border-radius: 999px;
+  background: var(--superficie); color: var(--primario);
+  border: 1.5px solid color-mix(in srgb, var(--primario) 28%, transparent);
+  font-weight: 700; font-size: .84rem; white-space: nowrap;
+  transition: transform .12s, background var(--transicion), border-color var(--transicion), color var(--transicion);
+}
+.monto-rapido:hover:not(:disabled) { border-color: var(--primario); }
+.monto-rapido:active:not(:disabled) { transform: scale(.94); }
+.monto-rapido.resta { color: var(--peligro); border-color: color-mix(in srgb, var(--peligro) 30%, transparent); }
+.monto-rapido.resta:hover:not(:disabled) { border-color: var(--peligro); }
+.monto-rapido.borrar { color: var(--texto-3); border-color: var(--borde); }
+.monto-rapido:disabled { opacity: .4; cursor: default; }
+@media (max-width: 640px) { .monto-rapido { padding: 7px 10px; font-size: .8rem; } }

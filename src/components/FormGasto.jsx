@@ -6,6 +6,7 @@ import { api } from '../api';
 import { ahoraLocal, aInputFecha, colorLibre, COLORES, dinero } from '../utils/formato';
 import { SelectorColor } from './Controles';
 import InputMonto from './InputMonto';
+import MontosRapidos from './MontosRapidos';
 import FechaHora from './FechaHora';
 import ModalCategorias from './ModalCategorias';
 import InputDescripcion from './InputDescripcion';
@@ -214,6 +215,7 @@ export default function FormGasto({ inicial, onGuardado, textoBoton = 'Guardar g
           onChange={set('monto')}
           autoFocus={!inicial}
         />
+        <MontosRapidos valor={form.monto} onAjustar={(calcular) => setForm((f) => ({ ...f, monto: calcular(Number(f.monto) || 0) }))} />
       </div>
 
       <SelectorConCreacion
