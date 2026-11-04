@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { Wallet, CalendarDays, TrendingDown, Receipt, Plus, FileDown, X } from 'lucide-react';
+import { Wallet, CalendarDays, TrendingDown, TrendingUp, Scale, Receipt, Plus, FileDown, X } from 'lucide-react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { dinero, MESES, ahoraLocal } from '../utils/formato';
 import { exportarGastosPDF } from '../utils/pdf';
 import { Segmentado, SelectorPeriodo } from '../components/Controles';
-import { GraficaCategorias, GraficaDiaria, GraficaMensual, GraficaPresupuestos } from '../components/Graficas';
+import { BarrasFuentes, GraficaCategorias, GraficaDiaria, GraficaMensual, GraficaPresupuestos } from '../components/Graficas';
 import ListaGastos, { SinGastos } from '../components/ListaGastos';
 import ModalBilletera from '../components/ModalBilletera';
 
@@ -18,7 +18,7 @@ const aparecer = (i) => ({
   transition: { delay: i * 0.05, duration: 0.35 },
 });
 
-function Stat({ icono: Icono, etiqueta, valor, nota, color, destacada, i, soloEscritorio }) {
+function Stat({ icono: Icono, etiqueta, valor, nota, color, valorColor, destacada, i, soloEscritorio }) {
   return (
     <motion.div className={`tarjeta stat ${destacada ? 'stat-destacada' : ''} ${soloEscritorio ? 'solo-escritorio' : ''}`} {...aparecer(i)}>
       <span className="etq">
@@ -27,7 +27,7 @@ function Stat({ icono: Icono, etiqueta, valor, nota, color, destacada, i, soloEs
         </span>
         {etiqueta}
       </span>
-      <span className="valor">{valor}</span>
+      <span className="valor" style={valorColor ? { color: valorColor } : undefined}>{valor}</span>
       {nota && <span className="nota">{nota}</span>}
     </motion.div>
   );
@@ -90,6 +90,8 @@ export default function Dashboard() {
 
   const mesesDe = (anio) => datos.meses_con_registros[anio] || [];
   const t = datos.totales;
+  const ingresosTotal = Number(datos.ingresos.total);
+  const balance = ingresosTotal - Number(t.total);
   const diasMes = periodo.mes ? datos.por_dia.length : 365;
   const esMesActual = periodo.anio === hoy.getFullYear() && periodo.mes === hoy.getMonth() + 1;
   const diasTranscurridos = esMesActual ? hoy.getDate() : diasMes;
@@ -151,9 +153,11 @@ export default function Dashboard() {
 
       <div className="rejilla rejilla-stats mb">
         <Stat i={0} destacada icono={Wallet} etiqueta="Saldo total" valor={dinero(datos.saldo_total)} nota={`${datos.billeteras.length} billetera(s)`} />
-        <Stat i={1} icono={TrendingDown} color="#ef4444" etiqueta={periodo.mes ? 'Gastado en el mes' : 'Gastado en el año'} valor={dinero(t.total)} nota={`Promedio diario ${dinero(t.total / Math.max(1, diasTranscurridos))}`} />
-        <Stat i={2} icono={CalendarDays} color="#f59e0b" etiqueta="Gastado hoy" valor={dinero(datos.hoy.total)} nota={`${datos.hoy.cantidad} gasto(s) hoy`} />
-        <Stat i={3} soloEscritorio icono={Receipt} color="#10b981" etiqueta="Registros" valor={t.cantidad} nota={`Mayor gasto ${dinero(t.mayor)}`} />
+        <Stat i={1} icono={TrendingUp} color="#10b981" etiqueta={periodo.mes ? 'Ingresos del mes' : 'Ingresos del año'} valor={dinero(ingresosTotal)} nota={`${datos.ingresos.cantidad} ingreso(s)`} />
+        <Stat i={2} icono={TrendingDown} color="#ef4444" etiqueta={periodo.mes ? 'Gastado en el mes' : 'Gastado en el año'} valor={dinero(t.total)} nota={`Promedio diario ${dinero(t.total / Math.max(1, diasTranscurridos))}`} />
+        <Stat i={3} icono={Scale} color={balance >= 0 ? '#10b981' : '#ef4444'} valorColor={balance >= 0 ? 'var(--exito)' : 'var(--peligro)'} etiqueta="Balance" valor={`${balance > 0 ? '+' : ''}${dinero(balance)}`} nota="Ingresos menos gastos" />
+        <Stat i={4} icono={CalendarDays} color="#f59e0b" etiqueta="Gastado hoy" valor={dinero(datos.hoy.total)} nota={`${datos.hoy.cantidad} gasto(s) hoy`} />
+        <Stat i={5} soloEscritorio icono={Receipt} color="#6366f1" etiqueta="Registros" valor={t.cantidad} nota={`Mayor gasto ${dinero(t.mayor)}`} />
       </div>
 
       <div className="rejilla rejilla-3-1 mb">
@@ -192,6 +196,16 @@ export default function Dashboard() {
             : <SinGastos />}
         </motion.div>
       </div>
+
+      {datos.por_fuente.length > 0 && (
+        <motion.div className="tarjeta mb" {...aparecer(4)}>
+          <div className="tarjeta-cab">
+            <h2>Ingresos por fuente</h2>
+            <span className="sub">{dinero(ingresosTotal)}</span>
+          </div>
+          <BarrasFuentes datos={datos.por_fuente} />
+        </motion.div>
+      )}
 
       <div className="rejilla rejilla-2 mb">
         {periodo.mes > 0 && (

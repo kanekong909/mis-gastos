@@ -5,15 +5,19 @@ import { api } from '../api';
 import Modal from './Modal';
 import { SelectorColor } from './Controles';
 
-// Lista de categorías con edición de nombre y color en el mismo lugar.
-export default function ModalCategorias({ abierto, onCerrar, onCambio }) {
+// Lista con edición de nombre y color en el mismo lugar. Sirve para las categorías de gasto
+// (por defecto) y para las fuentes de ingreso (`recurso={api.fuentes}`, ver FormIngreso).
+export default function ModalCategorias({
+  abierto, onCerrar, onCambio,
+  recurso = api.categorias, titulo = 'Mis categorías', singular = 'Categoría', plural = 'categorías', unidad = 'gasto',
+}) {
   const [categorias, setCategorias] = useState(null);
   const [editando, setEditando] = useState(null); // { id, nombre, color }
   const [guardando, setGuardando] = useState(false);
 
   const cargar = useCallback(
-    () => api.categorias.listar().then(setCategorias).catch((e) => toast.error(e.message)),
-    []
+    () => recurso.listar().then(setCategorias).catch((e) => toast.error(e.message)),
+    [recurso]
   );
 
   useEffect(() => {
@@ -27,8 +31,8 @@ export default function ModalCategorias({ abierto, onCerrar, onCambio }) {
     if (!editando.nombre.trim()) return toast.error('Escribe un nombre');
     setGuardando(true);
     try {
-      await api.categorias.editar(editando.id, { nombre: editando.nombre, color: editando.color });
-      toast.success('Categoría actualizada');
+      await recurso.editar(editando.id, { nombre: editando.nombre, color: editando.color });
+      toast.success(`${singular} actualizada`);
       setEditando(null);
       await cargar();
       onCambio?.();
@@ -42,11 +46,11 @@ export default function ModalCategorias({ abierto, onCerrar, onCambio }) {
   const coloresDeOtras = (id) => (categorias || []).filter((c) => c.id !== id).map((c) => c.color);
 
   return (
-    <Modal abierto={abierto} onCerrar={onCerrar} titulo="Mis categorías">
+    <Modal abierto={abierto} onCerrar={onCerrar} titulo={titulo}>
       {categorias === null ? (
         <div className="cargando" style={{ minHeight: 120 }}><div className="spinner" /></div>
       ) : categorias.length === 0 ? (
-        <div className="vacio"><Tags size={36} /><span>Aún no tienes categorías</span></div>
+        <div className="vacio"><Tags size={36} /><span>Aún no tienes {plural}</span></div>
       ) : (
         <div className="cat-lista">
           {categorias.map((c) => (
@@ -60,7 +64,7 @@ export default function ModalCategorias({ abierto, onCerrar, onCambio }) {
                     autoFocus
                     onChange={(e) => setEditando({ ...editando, nombre: e.target.value })}
                     onKeyDown={(e) => e.key === 'Escape' && (e.stopPropagation(), setEditando(null))}
-                    aria-label="Nombre de la categoría"
+                    aria-label={`Nombre de la ${singular.toLowerCase()}`}
                   />
                   <SelectorColor
                     valor={editando.color}
@@ -76,7 +80,7 @@ export default function ModalCategorias({ abierto, onCerrar, onCambio }) {
                 <div className="cat-vista">
                   <span className="punto" style={{ background: c.color }} />
                   <span className="cat-nombre">{c.nombre}</span>
-                  <span className="texto-3 cat-cuenta">{c.num_gastos} {Number(c.num_gastos) === 1 ? 'gasto' : 'gastos'}</span>
+                  <span className="texto-3 cat-cuenta">{c.num_gastos ?? c.num_ingresos} {Number(c.num_gastos ?? c.num_ingresos) === 1 ? unidad : `${unidad}s`}</span>
                   <button
                     className="btn-icono"
                     onClick={() => setEditando({ id: c.id, nombre: c.nombre, color: c.color })}

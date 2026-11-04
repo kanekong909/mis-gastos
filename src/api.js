@@ -58,6 +58,11 @@ export const api = {
     sugerir: (texto) => peticion('gastos.php', { params: { sugerir: texto } }),
     recientes: () => peticion('gastos.php', { params: { recientes: 1 } }),
   },
+  fuentes: recurso('fuentes.php'),
+  ingresos: {
+    ...recurso('ingresos.php'),
+    resumenAnios: () => peticion('ingresos.php', { params: { resumen: 'anios' } }),
+  },
   atajos: {
     ...recurso('atajos.php'),
     usar: (id, fecha) => peticion('atajos.php', { method: 'POST', body: { fecha }, params: { accion: 'usar', id } }),

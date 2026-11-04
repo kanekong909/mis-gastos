@@ -7,7 +7,7 @@ import SelectorAcento from './SelectorAcento';
 
 const RUTAS = [
   { to: '/', etiqueta: 'Dashboard', icono: LayoutDashboard },
-  { to: '/nuevo', etiqueta: 'Registrar gasto', corto: 'Nuevo', icono: PlusCircle },
+  { to: '/nuevo', etiqueta: 'Registrar', corto: 'Nuevo', icono: PlusCircle },
   { to: '/registros', etiqueta: 'Registros', icono: ListOrdered },
   { to: '/presupuestos', etiqueta: 'Presupuestos', icono: PiggyBank },
 ];

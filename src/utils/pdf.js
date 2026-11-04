@@ -5,7 +5,10 @@ import { dinero, fechaCorta, hora } from './formato';
 const INDIGO = [79, 70, 229];
 
 // Genera y descarga un PDF con la lista de gastos y un resumen por categoría.
-export function exportarGastosPDF({ titulo, subtitulo, gastos, usuario, presupuestos }) {
+// `tipo` = 'gastos' | 'ingresos': cambia los rótulos (los ingresos agrupan por fuente en vez de categoría).
+export function exportarGastosPDF({ titulo, subtitulo, gastos, usuario, presupuestos, tipo = 'gastos' }) {
+  const esIngreso = tipo === 'ingresos';
+  const rotuloCategoria = esIngreso ? 'Fuente' : 'Categoría';
   const doc = new jsPDF();
   const ancho = doc.internal.pageSize.getWidth();
 
@@ -25,7 +28,7 @@ export function exportarGastosPDF({ titulo, subtitulo, gastos, usuario, presupue
   doc.setTextColor(30);
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Total gastado: ${dinero(total)}`, 14, 44);
+  doc.text(`${esIngreso ? 'Total ingresado' : 'Total gastado'}: ${dinero(total)}`, 14, 44);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`${gastos.length} registro(s)`, 14, 50);
@@ -39,7 +42,7 @@ export function exportarGastosPDF({ titulo, subtitulo, gastos, usuario, presupue
 
   autoTable(doc, {
     startY: 56,
-    head: [['Categoría', 'Total', '%']],
+    head: [[rotuloCategoria, 'Total', '%']],
     body: filasCat,
     theme: 'grid',
     headStyles: { fillColor: INDIGO },
@@ -63,7 +66,7 @@ export function exportarGastosPDF({ titulo, subtitulo, gastos, usuario, presupue
 
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 8,
-    head: [['Fecha', 'Hora', 'Descripción', 'Categoría', 'Billetera', 'Monto']],
+    head: [['Fecha', 'Hora', 'Descripción', rotuloCategoria, 'Billetera', 'Monto']],
     body: gastos.map((g) => [
       fechaCorta(g.fecha), hora(g.fecha), g.descripcion || '—', g.categoria, g.billetera || 'Sin billetera', dinero(g.monto),
     ]),

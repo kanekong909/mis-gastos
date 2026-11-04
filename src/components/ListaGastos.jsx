@@ -27,7 +27,7 @@ function FilaGasto({ g, onEditar, onEliminar, indice = 0 }) {
           <span className="gasto-hora">{hora(g.fecha)}</span>
         </div>
       </div>
-      <div className="gasto-monto">-{dinero(g.monto)}</div>
+      <div className={`gasto-monto ${g.tipo === 'ingreso' ? 'es-ingreso' : ''}`}>{g.tipo === 'ingreso' ? '+' : '-'}{dinero(g.monto)}</div>
       {(onEditar || onEliminar) && (
         <div className="gasto-acciones">
           {onEditar && <button className="btn-icono" onClick={() => onEditar(g)} aria-label="Editar"><Pencil size={16} /></button>}

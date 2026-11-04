@@ -913,3 +913,22 @@ a { color: inherit; text-decoration: none; }
 .monto-rapido.borrar { color: var(--texto-3); border-color: var(--borde); }
 .monto-rapido:disabled { opacity: .4; cursor: default; }
 @media (max-width: 640px) { .monto-rapido { padding: 7px 10px; font-size: .8rem; } }
+
+/* Ingresos */
+.gasto-monto.es-ingreso { color: var(--exito); }
+
+/* Formulario de ingreso: el recuadro del monto y el botón van en verde */
+.monto-caja.ingreso { background: color-mix(in srgb, var(--exito) 14%, var(--superficie)); }
+.monto-caja.ingreso > label { color: var(--exito); }
+.btn-ingreso { background: linear-gradient(135deg, #059669, var(--exito)); box-shadow: 0 6px 18px color-mix(in srgb, var(--exito) 30%, transparent); }
+.btn-ingreso:hover:not(:disabled) { box-shadow: 0 10px 26px color-mix(in srgb, var(--exito) 42%, transparent); }
+
+/* Gráfica mensual: leyenda y barras de ingresos por fuente */
+.leyenda-mini { display: flex; justify-content: center; gap: 18px; margin-top: 8px; font-size: .78rem; color: var(--texto-3); font-weight: 600; }
+.leyenda-mini span { display: inline-flex; align-items: center; gap: 6px; }
+.leyenda-mini .punto { display: inline-block; }
+.fuentes-barras { display: flex; flex-direction: column; gap: 14px; }
+.fuente-cab { display: flex; align-items: center; gap: 10px; font-size: .88rem; margin-bottom: 6px; }
+.fuente-cab .nombre { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fuente-cab .valor { font-weight: 700; }
+.fuente-cab .pct { color: var(--texto-3); font-size: .78rem; width: 38px; text-align: right; }

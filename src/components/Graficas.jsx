@@ -15,28 +15,53 @@ function TooltipDinero({ active, payload, etiqueta }) {
   );
 }
 
-// Tocar una barra la selecciona; tocar la barra ya seleccionada la quita (lo decide `onClickMes`).
-export function GraficaMensual({ datos, mesActivo, onClickMes }) {
+function TooltipMes({ active, payload }) {
+  if (!active || !payload?.length) return null;
+  const fila = payload[0].payload;
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={datos} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
-        <CartesianGrid vertical={false} stroke="var(--borde)" strokeDasharray="4 4" />
-        <XAxis dataKey="mes" tickFormatter={(m) => MESES_CORTOS[m - 1]} {...ejes} />
-        <YAxis tickFormatter={dineroCorto} width={64} {...ejes} />
-        <Tooltip cursor={{ fill: 'var(--superficie-2)' }} content={<TooltipDinero etiqueta={(p) => MESES[p.mes - 1]} />} />
-        <Bar dataKey="total" radius={[8, 8, 0, 0]} maxBarSize={38} animationDuration={700} onClick={(d) => onClickMes?.(d.mes)} style={{ cursor: onClickMes ? 'pointer' : 'default' }}>
-          {datos.map((d) => (
-            <Cell key={d.mes} fill={d.mes === mesActivo ? 'url(#gradBarra)' : 'var(--primario-suave)'} />
-          ))}
-        </Bar>
-        <defs>
-          <linearGradient id="gradBarra" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" style={{ stopColor: 'color-mix(in oklch, var(--ac-1) 60%, white)' }} />
-            <stop offset="100%" style={{ stopColor: 'var(--ac-1)' }} />
-          </linearGradient>
-        </defs>
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="tooltip-grafica">
+      <div className="t">{MESES[fila.mes - 1]}</div>
+      <div><span className="punto" style={{ background: 'var(--primario-2)', display: 'inline-block', marginRight: 6 }} />Gastos {dinero(fila.total)}</div>
+      <div><span className="punto" style={{ background: 'var(--exito)', display: 'inline-block', marginRight: 6 }} />Ingresos {dinero(fila.ingresos)}</div>
+    </div>
+  );
+}
+
+// Gastos (color del tema) e ingresos (verde) de cada mes.
+// Tocar una barra selecciona el mes; tocar el mes ya seleccionado lo quita (lo decide `onClickMes`).
+export function GraficaMensual({ datos, mesActivo, onClickMes }) {
+  const sinSeleccion = !mesActivo;
+  return (
+    <div>
+      <ResponsiveContainer width="100%" height={260}>
+        <BarChart data={datos} margin={{ top: 8, right: 4, left: -8, bottom: 0 }} barGap={2}>
+          <CartesianGrid vertical={false} stroke="var(--borde)" strokeDasharray="4 4" />
+          <XAxis dataKey="mes" tickFormatter={(m) => MESES_CORTOS[m - 1]} {...ejes} />
+          <YAxis tickFormatter={dineroCorto} width={64} {...ejes} />
+          <Tooltip cursor={{ fill: 'var(--superficie-2)' }} content={<TooltipMes />} />
+          <Bar dataKey="total" radius={[6, 6, 0, 0]} maxBarSize={20} animationDuration={700} onClick={(d) => onClickMes?.(d.mes)} style={{ cursor: onClickMes ? 'pointer' : 'default' }}>
+            {datos.map((d) => (
+              <Cell key={d.mes} fill={d.mes === mesActivo ? 'url(#gradBarra)' : 'var(--primario-suave)'} />
+            ))}
+          </Bar>
+          <Bar dataKey="ingresos" radius={[6, 6, 0, 0]} maxBarSize={20} animationDuration={700} onClick={(d) => onClickMes?.(d.mes)} style={{ cursor: onClickMes ? 'pointer' : 'default' }}>
+            {datos.map((d) => (
+              <Cell key={d.mes} fill="var(--exito)" fillOpacity={sinSeleccion || d.mes === mesActivo ? 0.9 : 0.28} />
+            ))}
+          </Bar>
+          <defs>
+            <linearGradient id="gradBarra" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" style={{ stopColor: 'color-mix(in oklch, var(--ac-1) 60%, white)' }} />
+              <stop offset="100%" style={{ stopColor: 'var(--ac-1)' }} />
+            </linearGradient>
+          </defs>
+        </BarChart>
+      </ResponsiveContainer>
+      <div className="leyenda-mini">
+        <span><i className="punto" style={{ background: 'var(--ac-1)' }} /> Gastos</span>
+        <span><i className="punto" style={{ background: 'var(--exito)' }} /> Ingresos</span>
+      </div>
+    </div>
   );
 }
 
@@ -141,5 +166,28 @@ export function GraficaPresupuestos({ datos }) {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+  );
+}
+
+// Ingresos por fuente: una barra horizontal por cada una, con su parte del total.
+export function BarrasFuentes({ datos }) {
+  const total = datos.reduce((s, d) => s + Number(d.total), 0);
+  return (
+    <div className="fuentes-barras">
+      {datos.map((d) => {
+        const pct = total ? (Number(d.total) / total) * 100 : 0;
+        return (
+          <div className="fuente-fila" key={d.id}>
+            <div className="fuente-cab">
+              <span className="punto" style={{ background: d.color }} />
+              <span className="nombre">{d.nombre}</span>
+              <span className="valor">{dinero(d.total)}</span>
+              <span className="pct">{Math.round(pct)}%</span>
+            </div>
+            <div className="barra"><div className="barra-relleno" style={{ width: `${pct}%`, background: d.color }} /></div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
