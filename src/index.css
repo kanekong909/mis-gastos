@@ -978,3 +978,40 @@ a { color: inherit; text-decoration: none; }
   .nav-movil .nav-agregar { flex-shrink: 0; }
   .nav-movil .nav-item { padding: 8px 4px; min-width: 0; font-size: .64rem; }
 }
+
+/* ---------- Pagos de crédito (cuotas) ---------- */
+.progreso-cuotas { width: 100%; min-width: 64px; }
+.progreso-cuotas .barra { height: 6px; }
+.celda-cuotas { min-width: 78px; }
+.celda-cuotas span { display: block; margin-bottom: 4px; font-weight: 700; }
+.celda-acciones { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.btn-pagar, .btn-pagado { padding: 6px 12px; font-size: .8rem; }
+.btn-pagado { color: var(--exito); }
+.fila-pagada td:not(.celda-acciones) { opacity: .6; }
+.credito-avance { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.credito-avance .progreso-cuotas { flex: 1; }
+.credito-avance .texto-3 { font-size: .78rem; white-space: nowrap; }
+.credito-pagado-tarjeta .credito-quien, .credito-pagado-tarjeta .credito-datos { opacity: .65; }
+.credito-pie { align-items: center; justify-content: space-between; gap: 8px; }
+
+.avance-credito { margin-bottom: 18px; }
+.avance-cifras { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.avance-cifras span { font-size: .85rem; }
+.avance-credito .barra { height: 10px; }
+.avance-pie { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; font-size: .78rem; }
+.credito-pagado {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px; border-radius: var(--radio-sm); margin-bottom: 8px;
+  background: color-mix(in srgb, var(--exito) 14%, var(--superficie)); color: var(--exito); font-weight: 700;
+}
+.form-pago { padding: 14px; border-radius: var(--radio-sm); background: var(--superficie-2); }
+.form-pago h4 { margin-bottom: 12px; font-size: .95rem; }
+.pagos-lista { display: flex; flex-direction: column; }
+.pago-fila { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); }
+.pago-fila:last-child { border-bottom: none; }
+.pago-fila .atajo-texto { flex: 1; }
+.pago-numero {
+  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center; font-weight: 800; font-size: .85rem;
+  background: var(--primario-suave); color: var(--primario);
+}

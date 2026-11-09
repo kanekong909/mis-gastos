@@ -60,6 +60,7 @@ export const api = {
   },
   fuentes: recurso('fuentes.php'),
   creditos: recurso('creditos.php'),
+  pagosCredito: recurso('pagos_credito.php'),
   ingresos: {
     ...recurso('ingresos.php'),
     resumenAnios: () => peticion('ingresos.php', { params: { resumen: 'anios' } }),
