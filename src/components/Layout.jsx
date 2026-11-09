@@ -1,6 +1,6 @@
 import { NavLink, useLocation, useOutlet } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LayoutDashboard, PlusCircle, ListOrdered, PiggyBank, Moon, Sun, LogOut, Wallet, Plus } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, ListOrdered, PiggyBank, Landmark, Moon, Sun, LogOut, Wallet, Plus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTema } from '../context/TemaContext';
 import SelectorAcento from './SelectorAcento';
@@ -10,7 +10,12 @@ const RUTAS = [
   { to: '/nuevo', etiqueta: 'Registrar', corto: 'Nuevo', icono: PlusCircle },
   { to: '/registros', etiqueta: 'Registros', icono: ListOrdered },
   { to: '/presupuestos', etiqueta: 'Presupuestos', icono: PiggyBank },
+  { to: '/creditos', etiqueta: 'Créditos', icono: Landmark },
 ];
+
+// Barra inferior del celular: el botón "+" queda en el centro.
+const ORDEN_MOVIL = ['/', '/registros', '/nuevo', '/presupuestos', '/creditos'];
+const RUTAS_MOVIL = ORDEN_MOVIL.map((to) => RUTAS.find((r) => r.to === to));
 
 function Marca() {
   return (
@@ -109,7 +114,7 @@ export default function Layout() {
       </div>
 
       <nav className="nav-movil">
-        {RUTAS.map(({ to, etiqueta, corto, icono: Icono }) =>
+        {RUTAS_MOVIL.map(({ to, etiqueta, corto, icono: Icono }) =>
           to === '/nuevo' ? (
             <NavLink key={to} to={to} className="nav-agregar" aria-label={etiqueta}><Plus size={26} /></NavLink>
           ) : (

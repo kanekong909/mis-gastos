@@ -59,6 +59,7 @@ export const api = {
     recientes: () => peticion('gastos.php', { params: { recientes: 1 } }),
   },
   fuentes: recurso('fuentes.php'),
+  creditos: recurso('creditos.php'),
   ingresos: {
     ...recurso('ingresos.php'),
     resumenAnios: () => peticion('ingresos.php', { params: { resumen: 'anios' } }),

@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import NuevoGasto from './pages/NuevoGasto';
 import Registros from './pages/Registros';
 import Presupuestos from './pages/Presupuestos';
+import Creditos from './pages/Creditos';
 
 export default function App() {
   const { usuario, cargando } = useAuth();
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="nuevo" element={<NuevoGasto />} />
             <Route path="registros" element={<Registros />} />
             <Route path="presupuestos" element={<Presupuestos />} />
+            <Route path="creditos" element={<Creditos />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

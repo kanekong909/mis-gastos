@@ -13,7 +13,7 @@ const textoFecha = (clave) => {
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 
-function Calendario({ seleccionado, onElegir }) {
+export function Calendario({ seleccionado, onElegir }) {
   const [vista, setVista] = useState(() => {
     const [y, m] = seleccionado.split('-').map(Number);
     return { y, m: m - 1 };

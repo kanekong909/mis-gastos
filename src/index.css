@@ -932,3 +932,49 @@ a { color: inherit; text-decoration: none; }
 .fuente-cab .nombre { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fuente-cab .valor { font-weight: 700; }
 .fuente-cab .pct { color: var(--texto-3); font-size: .78rem; width: 38px; text-align: right; }
+
+/* ---------- Créditos ---------- */
+.form-credito .sugerido { font-size: .78rem; text-align: left; width: fit-content; }
+
+/* Escritorio: tabla como la hoja de Excel */
+.tabla-creditos-caja { padding: 8px 8px 4px; overflow-x: auto; }
+.tabla-creditos { width: 100%; border-collapse: collapse; font-size: .86rem; min-width: 780px; }
+.tabla-creditos th {
+  text-align: left; padding: 10px 8px; font-size: .7rem; text-transform: uppercase; letter-spacing: .03em;
+  color: var(--texto-3); font-weight: 700; border-bottom: 1px solid var(--borde); line-height: 1.2;
+}
+.tabla-creditos td { padding: 11px 8px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+.tabla-creditos tbody tr:hover { background: var(--superficie-2); }
+.tabla-creditos .num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-creditos .prestador { font-weight: 700; }
+.tabla-creditos .total { font-weight: 800; }
+.tabla-creditos tfoot td { border-bottom: none; font-weight: 800; background: var(--superficie-2); }
+.tabla-creditos tfoot td:first-child { border-radius: 10px 0 0 10px; }
+.tabla-creditos tfoot td:last-child { border-radius: 0 10px 10px 0; }
+
+/* Celular: tarjetas */
+.creditos-tarjetas { display: none; }
+.credito { margin-bottom: 12px; }
+.credito-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.credito-quien { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.credito-quien strong { font-size: 1rem; overflow-wrap: anywhere; }
+.credito-quien .texto-3 { font-size: .8rem; }
+.credito-deuda { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.credito-deuda .texto-3 { font-size: .72rem; }
+.credito-deuda strong { font-size: 1.2rem; letter-spacing: -.02em; }
+.credito-datos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin: 0; padding-top: 12px; border-top: 1px solid var(--borde); }
+.credito-datos dt { font-size: .72rem; color: var(--texto-3); font-weight: 600; }
+.credito-datos dd { margin: 1px 0 0; font-weight: 700; font-size: .92rem; }
+.credito-datos dd small { font-weight: 500; color: var(--texto-3); }
+.credito-mensual { grid-column: 1 / -1; }
+.credito-pie { display: flex; justify-content: flex-end; margin: 4px -6px -6px 0; }
+@media (max-width: 860px) {
+  .tabla-creditos-caja { display: none; }
+  .creditos-tarjetas { display: block; }
+}
+
+/* Barra inferior del celular con 5 entradas: el botón "+" no se deforma */
+@media (max-width: 860px) {
+  .nav-movil .nav-agregar { flex-shrink: 0; }
+  .nav-movil .nav-item { padding: 8px 4px; min-width: 0; font-size: .64rem; }
+}
