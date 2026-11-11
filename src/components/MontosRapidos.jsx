@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { formatearMonto } from './InputMonto';
 import { Segmentado } from './Controles';
 
-const VALORES = [100, 200, 500, 1000, 2000, 20000, 50000];
+const VALORES = [100, 200, 500, 1000, 2000, 10000, 20000, 50000];
 
 // Botones para ir armando el monto sin teclear: suman o restan al valor actual.
 // `valor` usa el mismo formato crudo que InputMonto ("20000.5"). `onAjustar(fn)` recibe una

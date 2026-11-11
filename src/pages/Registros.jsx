@@ -10,6 +10,7 @@ import { Segmentado } from '../components/Controles';
 import ListaGastos, { SinGastos } from '../components/ListaGastos';
 import FormGasto from '../components/FormGasto';
 import FormIngreso from '../components/FormIngreso';
+import FormTransferencia from '../components/FormTransferencia';
 import Modal, { Confirmar } from '../components/Modal';
 
 function Anio({ datos, abierto, onAlternar, seleccion, onElegir, unidad = 'gastos' }) {
@@ -56,12 +57,23 @@ function Anio({ datos, abierto, onAlternar, seleccion, onElegir, unidad = 'gasto
 // Los ingresos usan la misma lista y filtros que los gastos: se les da su forma y la marca "ingreso".
 const comoFila = (i) => ({ ...i, tipo: 'ingreso', categoria: i.fuente, categoria_id: i.fuente_id, categoria_color: i.fuente_color });
 
+// Las transferencias también usan esta lista: "categoria" es el texto "origen → destino" (para buscar).
+const comoTransferencia = (t) => ({ ...t, tipo: 'transferencia', categoria: `${t.origen} → ${t.destino}`, categoria_id: null });
+
+const NOMBRES = {
+  gastos: { uno: 'gasto', varios: 'gastos', unoCapital: 'Gasto' },
+  ingresos: { uno: 'ingreso', varios: 'ingresos', unoCapital: 'Ingreso' },
+  transferencias: { uno: 'transferencia', varios: 'transferencias', unoCapital: 'Transferencia' },
+};
+
 export default function Registros() {
   const { usuario } = useAuth();
   const hoy = new Date();
   const actual = { anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 };
-  const [tipo, setTipo] = useState('gastos'); // 'gastos' | 'ingresos'
+  const [tipo, setTipo] = useState('gastos'); // 'gastos' | 'ingresos' | 'transferencias'
   const esIngreso = tipo === 'ingresos';
+  const esTransf = tipo === 'transferencias';
+  const nombre = NOMBRES[tipo];
   const [pestana, setPestana] = useState('actual');
   const [seleccion, setSeleccion] = useState(actual);
   const [resumen, setResumen] = useState([]);
@@ -74,13 +86,13 @@ export default function Registros() {
   const [editando, setEditando] = useState(null);
   const [eliminando, setEliminando] = useState(null);
 
-  const recurso = esIngreso ? api.ingresos : api.gastos;
+  const recurso = esTransf ? api.transferencias : esIngreso ? api.ingresos : api.gastos;
   const cargar = useCallback(() => {
     recurso.listar({ anio: seleccion.anio, mes: seleccion.mes || undefined })
-      .then((lista) => setGastos(esIngreso ? lista.map(comoFila) : lista))
+      .then((lista) => setGastos(esTransf ? lista.map(comoTransferencia) : esIngreso ? lista.map(comoFila) : lista))
       .catch((e) => toast.error(e.message));
     recurso.resumenAnios().then(setResumen).catch(() => {});
-  }, [seleccion, recurso, esIngreso]);
+  }, [seleccion, recurso, esIngreso, esTransf]);
 
   useEffect(cargar, [cargar]);
   useEffect(() => {
@@ -107,7 +119,10 @@ export default function Registros() {
     return gastos.filter((g) =>
       (!q || g.descripcion.toLowerCase().includes(q) || g.categoria.toLowerCase().includes(q)) &&
       (!filtro.categoria_id || g.categoria_id === Number(filtro.categoria_id)) &&
-      (!filtro.billetera_id || (filtro.billetera_id === 'ninguna' ? g.billetera_id === null : g.billetera_id === Number(filtro.billetera_id)))
+      (!filtro.billetera_id || (g.tipo === 'transferencia'
+        // En una transferencia, la billetera puede ser el origen o el destino.
+        ? g.origen_id === Number(filtro.billetera_id) || g.destino_id === Number(filtro.billetera_id)
+        : filtro.billetera_id === 'ninguna' ? g.billetera_id === null : g.billetera_id === Number(filtro.billetera_id)))
     );
   }, [gastos, filtro]);
 
@@ -117,7 +132,7 @@ export default function Registros() {
   const confirmarEliminar = async () => {
     try {
       await recurso.eliminar(eliminando.id);
-      toast.success(esIngreso ? 'Ingreso eliminado' : 'Gasto eliminado');
+      toast.success(`${nombre.unoCapital} eliminad${esTransf ? 'a' : 'o'}`);
       setEliminando(null);
       cargar();
     } catch (e) {
@@ -126,6 +141,7 @@ export default function Registros() {
   };
 
   const descargarPDF = () => {
+    if (esTransf) return;
     if (!filtrados.length) return toast(esIngreso ? 'No hay ingresos para exportar' : 'No hay gastos para exportar');
     exportarGastosPDF({
       titulo: `${esIngreso ? 'Ingresos' : 'Gastos'} ${nombrePeriodo}`,
@@ -141,7 +157,7 @@ export default function Registros() {
       <div className="encabezado">
         <div>
           <h1>Registros</h1>
-          <p>Consulta, edita o elimina tus {esIngreso ? 'ingresos' : 'gastos'}.</p>
+          <p>Consulta, edita o elimina tus {nombre.varios}.</p>
         </div>
         <Segmentado
           valor={pestana}
@@ -154,7 +170,7 @@ export default function Registros() {
         <Segmentado
           valor={tipo}
           onCambio={cambiarTipo}
-          opciones={[{ valor: 'gastos', etiqueta: 'Gastos' }, { valor: 'ingresos', etiqueta: 'Ingresos' }]}
+          opciones={[{ valor: 'gastos', etiqueta: 'Gastos' }, { valor: 'ingresos', etiqueta: 'Ingresos' }, { valor: 'transferencias', etiqueta: 'Transferencias' }]}
         />
       </div>
 
@@ -169,9 +185,9 @@ export default function Registros() {
                 onAlternar={() => setAbiertos((o) => ({ ...o, [a.anio]: !o[a.anio] }))}
                 seleccion={seleccion}
                 onElegir={setSeleccion}
-                unidad={esIngreso ? 'ingresos' : 'gastos'}
+                unidad={nombre.varios}
               />
-            )) : <div className="tarjeta"><SinGastos texto={esIngreso ? 'Aún no tienes ingresos registrados' : 'Aún no tienes gastos registrados'} /></div>}
+            )) : <div className="tarjeta"><SinGastos texto={`Aún no tienes ${nombre.varios} registrad${esTransf ? 'a' : 'o'}s`} /></div>}
           </motion.div>
         )}
       </AnimatePresence>
@@ -180,9 +196,9 @@ export default function Registros() {
         <div className="tarjeta-cab">
           <div>
             <h2>{nombrePeriodo}</h2>
-            <span className="sub">{filtrados.length} {esIngreso ? 'ingreso(s)' : 'gasto(s)'} · {dinero(total)}</span>
+            <span className="sub">{filtrados.length} {nombre.uno}(s) · {dinero(total)}</span>
           </div>
-          <button className="btn btn-secundario" onClick={descargarPDF}><FileDown size={17} /> <span className="solo-escritorio">Descargar </span>PDF</button>
+          {!esTransf && <button className="btn btn-secundario" onClick={descargarPDF}><FileDown size={17} /> <span className="solo-escritorio">Descargar </span>PDF</button>}
         </div>
 
         <div className="filtros">
@@ -190,13 +206,15 @@ export default function Registros() {
             <Search size={17} />
             <input className="input" placeholder="Buscar por descripción…" value={filtro.q} onChange={(e) => setFiltro({ ...filtro, q: e.target.value })} />
           </div>
-          <select className="select select-mini" value={filtro.categoria_id} onChange={(e) => setFiltro({ ...filtro, categoria_id: e.target.value })}>
-            <option value="">{esIngreso ? 'Todas las fuentes' : 'Todas las categorías'}</option>
-            {(esIngreso ? fuentes : categorias).map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </select>
+          {!esTransf && (
+            <select className="select select-mini" value={filtro.categoria_id} onChange={(e) => setFiltro({ ...filtro, categoria_id: e.target.value })}>
+              <option value="">{esIngreso ? 'Todas las fuentes' : 'Todas las categorías'}</option>
+              {(esIngreso ? fuentes : categorias).map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            </select>
+          )}
           <select className="select select-mini" value={filtro.billetera_id} onChange={(e) => setFiltro({ ...filtro, billetera_id: e.target.value })}>
             <option value="">Todas las billeteras</option>
-            <option value="ninguna">Sin billetera</option>
+            {!esTransf && <option value="ninguna">Sin billetera</option>}
             {billeteras.map((b) => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
         </div>
@@ -208,8 +226,15 @@ export default function Registros() {
         )}
       </div>
 
-      <Modal abierto={!!editando} onCerrar={() => setEditando(null)} titulo={esIngreso ? 'Editar ingreso' : 'Editar gasto'}>
-        {editando && (esIngreso ? (
+      <Modal abierto={!!editando} onCerrar={() => setEditando(null)} titulo={`Editar ${nombre.uno}`}>
+        {editando && (esTransf ? (
+          <FormTransferencia
+            key={editando.id}
+            inicial={editando}
+            textoBoton="Guardar cambios"
+            onGuardado={() => { setEditando(null); cargar(); }}
+          />
+        ) : esIngreso ? (
           <FormIngreso
             key={editando.id}
             inicial={editando}
@@ -230,8 +255,8 @@ export default function Registros() {
         abierto={!!eliminando}
         onCerrar={() => setEliminando(null)}
         onConfirmar={confirmarEliminar}
-        titulo={esIngreso ? 'Eliminar ingreso' : 'Eliminar gasto'}
-        mensaje={eliminando && `Se eliminará "${eliminando.descripcion || eliminando.categoria}" por ${dinero(eliminando.monto)}. Esta acción no se puede deshacer.`}
+        titulo={`Eliminar ${nombre.uno}`}
+        mensaje={eliminando && `Se eliminará "${eliminando.descripcion || eliminando.categoria}" por ${dinero(eliminando.monto)}.${esTransf ? ' Los saldos de las dos billeteras vuelven a como estaban.' : ''} Esta acción no se puede deshacer.`}
       />
     </>
   );

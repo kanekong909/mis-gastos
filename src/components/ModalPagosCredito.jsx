@@ -12,7 +12,7 @@ import FechaHora from './FechaHora';
 export default function ModalPagosCredito({ abierto, credito, onCerrar, onCambio }) {
   const [pagos, setPagos] = useState(null);
   const [billeteras, setBilleteras] = useState([]);
-  const [form, setForm] = useState({ monto: '', fecha: ahoraLocal(), billetera_id: '' });
+  const [form, setForm] = useState({ monto: '', manejo: '', fecha: ahoraLocal(), billetera_id: '' });
   const [guardando, setGuardando] = useState(false);
   const [deshaciendo, setDeshaciendo] = useState(null);
 
@@ -28,7 +28,7 @@ export default function ModalPagosCredito({ abierto, credito, onCerrar, onCambio
   useEffect(() => {
     if (!abierto || !credito) return;
     setPagos(null);
-    setForm({ monto: String(Number(credito.pago_mensual) || ''), fecha: ahoraLocal(), billetera_id: '' });
+    setForm({ monto: String(Number(credito.pago_mensual) || ''), manejo: String(Number(credito.manejo_tarjeta) || ''), fecha: ahoraLocal(), billetera_id: '' });
     cargar();
     api.billeteras.listar().then((b) => {
       setBilleteras(b);
@@ -42,7 +42,10 @@ export default function ModalPagosCredito({ abierto, credito, onCerrar, onCambio
   const pagadas = credito.pagadas;
   const completo = pagadas >= credito.cuotas;
   const pagado = Number(credito.pagado);
-  const pendiente = Math.max(0, Number(credito.deuda_total) - pagado);
+  const manejoPagado = Number(credito.manejo_pagado);
+  // Lo pendiente descuenta solo lo abonado a la deuda: el manejo de tarjeta de cada pago no cuenta.
+  const pendiente = completo ? 0 : Math.max(0, Number(credito.deuda_total) - Number(credito.abonado));
+  const tieneManejo = Number(credito.manejo_tarjeta) > 0;
   const avance = credito.cuotas ? Math.min(100, (pagadas / credito.cuotas) * 100) : 0;
 
   const pagar = async (e) => {
@@ -53,6 +56,8 @@ export default function ModalPagosCredito({ abierto, credito, onCerrar, onCambio
       const r = await api.pagosCredito.crear({
         credito_id: credito.id,
         monto: Number(form.monto),
+        // Con manejo de tarjeta, se indica cuánto del pago es manejo (0 si esta vez no lo incluye).
+        ...(tieneManejo ? { manejo: Number(form.manejo) || 0 } : {}),
         fecha: form.fecha.replace('T', ' '),
         billetera_id: form.billetera_id === '' ? null : Number(form.billetera_id),
       });
@@ -89,7 +94,7 @@ export default function ModalPagosCredito({ abierto, credito, onCerrar, onCambio
           </div>
           <div className="barra"><div className="barra-relleno" style={{ width: `${avance}%`, background: completo ? 'var(--exito)' : 'var(--primario-2)' }} /></div>
           <div className="avance-pie texto-3">
-            <span>Pagado {dinero(pagado)}</span>
+            <span>Pagado {dinero(pagado)}{manejoPagado > 0 && ` (con manejo ${dinero(manejoPagado)})`}</span>
             <span>Deuda total {dinero(credito.deuda_total)}</span>
           </div>
         </div>
@@ -112,6 +117,13 @@ export default function ModalPagosCredito({ abierto, credito, onCerrar, onCambio
                 </select>
               </div>
             </div>
+            {tieneManejo && (
+              <div className="campo">
+                <label>De ese monto, manejo de tarjeta</label>
+                <InputMonto value={form.manejo} onChange={(manejo) => setForm((f) => ({ ...f, manejo }))} placeholder="0" />
+                <span className="texto-3" style={{ fontSize: '.78rem' }}>No baja la deuda; solo el resto cuenta como cuota.</span>
+              </div>
+            )}
             <div className="campo">
               <label>Fecha y hora</label>
               <FechaHora value={form.fecha} onChange={(fecha) => setForm((f) => ({ ...f, fecha }))} />
@@ -135,7 +147,7 @@ export default function ModalPagosCredito({ abierto, credito, onCerrar, onCambio
                 <span className="pago-numero">{p.numero}</span>
                 <span className="atajo-texto">
                   <span className="atajo-nombre">{dinero(p.monto)}</span>
-                  <span className="atajo-monto">{fechaCorta(p.fecha)} · {p.billetera || 'Sin billetera'}</span>
+                  <span className="atajo-monto">{fechaCorta(p.fecha)} · {p.billetera || 'Sin billetera'}{Number(p.manejo) > 0 && ` · incluye manejo ${dinero(p.manejo)}`}</span>
                 </span>
                 <button className="btn-icono peligro" onClick={() => setDeshaciendo(p)} aria-label={`Deshacer el pago de la cuota ${p.numero}`}>
                   <Trash2 size={16} />

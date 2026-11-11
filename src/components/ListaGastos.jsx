@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Pencil, Trash2, Receipt } from 'lucide-react';
+import { ArrowLeftRight, Pencil, Trash2, Receipt } from 'lucide-react';
 import { dinero, diaClave, fechaLarga, hora } from '../utils/formato';
 
 function FilaGasto({ g, onEditar, onEliminar, indice = 0 }) {
+  const esTransferencia = g.tipo === 'transferencia';
   return (
     <motion.div
       layout
@@ -12,22 +13,38 @@ function FilaGasto({ g, onEditar, onEliminar, indice = 0 }) {
       exit={{ opacity: 0, x: 20, height: 0, paddingTop: 0, paddingBottom: 0 }}
       transition={{ duration: 0.22, delay: Math.min(indice, 12) * 0.025 }}
     >
-      <div className="gasto-icono" style={{ background: `${g.categoria_color}22`, color: g.categoria_color }}>
-        {g.categoria?.[0]}
-      </div>
+      {esTransferencia ? (
+        <div className="gasto-icono icono-transferencia"><ArrowLeftRight size={18} /></div>
+      ) : (
+        <div className="gasto-icono" style={{ background: `${g.categoria_color}22`, color: g.categoria_color }}>
+          {g.categoria?.[0]}
+        </div>
+      )}
       <div className="gasto-info">
         {g.descripcion
           ? <div className="gasto-desc">{g.descripcion}</div>
-          : <div className="gasto-desc gasto-desc-vacia">Sin descripción</div>}
+          : <div className={`gasto-desc ${esTransferencia ? '' : 'gasto-desc-vacia'}`}>{esTransferencia ? 'Transferencia' : 'Sin descripción'}</div>}
         <div className="gasto-meta">
-          <span className="etiqueta" style={{ '--punto': g.categoria_color }}>{g.categoria}</span>
-          {g.billetera
-            ? <span className="etiqueta" style={{ '--punto': g.billetera_color }}>{g.billetera}</span>
-            : <span className="etiqueta etiqueta-alerta">Sin billetera</span>}
+          {esTransferencia ? (
+            <>
+              <span className="etiqueta" style={{ '--punto': g.origen_color }}>{g.origen}</span>
+              <span className="flecha-transf">→</span>
+              <span className="etiqueta" style={{ '--punto': g.destino_color }}>{g.destino}</span>
+            </>
+          ) : (
+            <>
+              <span className="etiqueta" style={{ '--punto': g.categoria_color }}>{g.categoria}</span>
+              {g.billetera
+                ? <span className="etiqueta" style={{ '--punto': g.billetera_color }}>{g.billetera}</span>
+                : <span className="etiqueta etiqueta-alerta">Sin billetera</span>}
+            </>
+          )}
           <span className="gasto-hora">{hora(g.fecha)}</span>
         </div>
       </div>
-      <div className={`gasto-monto ${g.tipo === 'ingreso' ? 'es-ingreso' : ''}`}>{g.tipo === 'ingreso' ? '+' : '-'}{dinero(g.monto)}</div>
+      <div className={`gasto-monto ${g.tipo === 'ingreso' ? 'es-ingreso' : ''} ${esTransferencia ? 'es-transferencia' : ''}`}>
+        {esTransferencia ? '' : g.tipo === 'ingreso' ? '+' : '-'}{dinero(g.monto)}
+      </div>
       {(onEditar || onEliminar) && (
         <div className="gasto-acciones">
           {onEditar && <button className="btn-icono" onClick={() => onEditar(g)} aria-label="Editar"><Pencil size={16} /></button>}

@@ -14,8 +14,9 @@ const dineroOGuion = (v) => (Number(v) ? dinero(v) : '—');
 const fechaTabla = (f) => { const d = aFecha(f); return `${d.getDate()} ${MESES_CORTOS[d.getMonth()].toLowerCase()} ${d.getFullYear()}`; };
 const suma = (lista, campo) => lista.reduce((s, c) => s + Number(c[campo]), 0);
 
-// Lo que falta por pagar: la deuda total menos lo ya pagado (los pagos son gastos enlazados).
-const pendienteDe = (c) => (c.pagadas >= c.cuotas ? 0 : Math.max(0, Number(c.deuda_total) - Number(c.pagado)));
+// Lo que falta por pagar: la deuda total menos lo abonado a ella (cada pago es un gasto enlazado,
+// y de cada pago se resta el manejo de tarjeta, que no baja la deuda).
+const pendienteDe = (c) => (c.pagadas >= c.cuotas ? 0 : Math.max(0, Number(c.deuda_total) - Number(c.abonado)));
 const estaPagado = (c) => c.pagadas >= c.cuotas;
 const avanceDe = (c) => (c.cuotas ? Math.min(100, (c.pagadas / c.cuotas) * 100) : 0);
 
