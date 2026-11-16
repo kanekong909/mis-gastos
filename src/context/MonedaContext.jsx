@@ -31,7 +31,18 @@ export function MonedaProvider({ children }) {
     return r;
   }, []);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    cargar();
+    // Con la pestaña abierta: se revisa cada 30 min y al volver a ella. Solo consulta la red si
+    // la tasa guardada ya venció (6 h), así que revisar seguido no gasta peticiones de más.
+    const revisar = () => { if (document.visibilityState === 'visible') cargar(); };
+    const intervalo = setInterval(revisar, 30 * 60 * 1000);
+    document.addEventListener('visibilitychange', revisar);
+    return () => {
+      clearInterval(intervalo);
+      document.removeEventListener('visibilitychange', revisar);
+    };
+  }, [cargar]);
 
   // Si no hay tasas para la moneda guardada, se muestra en pesos hasta que lleguen.
   const efectiva = moneda !== 'COP' && info.tasas?.[moneda] ? moneda : 'COP';
