@@ -4,6 +4,7 @@ import { LayoutDashboard, PlusCircle, ListOrdered, PiggyBank, Landmark, Moon, Su
 import { useAuth } from '../context/AuthContext';
 import { useTema } from '../context/TemaContext';
 import SelectorAcento from './SelectorAcento';
+import SelectorMoneda from './SelectorMoneda';
 
 const RUTAS = [
   { to: '/', etiqueta: 'Dashboard', icono: LayoutDashboard },
@@ -75,6 +76,7 @@ export default function Layout() {
             <span>{tema === 'oscuro' ? 'Modo claro' : 'Modo oscuro'}</span>
           </button>
           <SelectorAcento etiqueta="Color del tema" lado="arriba-izquierda" className="nav-item" />
+          <SelectorMoneda etiqueta="Moneda" lado="arriba-izquierda" className="nav-item" />
           <button className="nav-item" onClick={logout}>
             <LogOut size={19} /><span>Cerrar sesión</span>
           </button>
@@ -92,6 +94,7 @@ export default function Layout() {
         <header className="barra-movil">
           <Marca />
           <div style={{ display: 'flex', gap: 4 }}>
+            <SelectorMoneda />
             <SelectorAcento />
             <BotonTema />
             <button className="btn-icono" onClick={logout} aria-label="Cerrar sesión"><LogOut size={19} /></button>

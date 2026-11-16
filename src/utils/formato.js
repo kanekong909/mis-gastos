@@ -1,20 +1,26 @@
+import { aMonedaVista, MONEDAS, monedaActual } from './moneda';
+
 export const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 export const MESES_CORTOS = MESES.map((m) => m.slice(0, 3));
 
-const formatoDinero = new Intl.NumberFormat('es-CO', {
-  style: 'currency', currency: 'COP', maximumFractionDigits: 0,
-});
-export const dinero = (v) => formatoDinero.format(Number(v) || 0);
+// Los montos se guardan en pesos (COP); aquí se muestran en la moneda elegida (ver utils/moneda.js).
+const formatos = {
+  COP: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }),
+  USD: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  EUR: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'EUR', currencyDisplay: 'narrowSymbol', minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+};
+export const dinero = (v) => formatos[monedaActual()].format(aMonedaVista(v));
 
-// Formato corto para ejes de gráficas: $1,2 M / $350 mil
+// Formato corto para ejes de gráficas: $1,2 M / $350 mil (con el símbolo de la moneda elegida)
 export const dineroCorto = (v) => {
-  const n = Number(v) || 0;
-  if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toLocaleString('es-CO', { maximumFractionDigits: 1 })} M`;
-  if (Math.abs(n) >= 1e3) return `$${Math.round(n / 1e3)} mil`;
-  return `$${n}`;
+  const n = aMonedaVista(v);
+  const simbolo = MONEDAS[monedaActual()].simbolo;
+  if (Math.abs(n) >= 1e6) return `${simbolo}${(n / 1e6).toLocaleString('es-CO', { maximumFractionDigits: 1 })} M`;
+  if (Math.abs(n) >= 1e3) return `${simbolo}${Math.round(n / 1e3)} mil`;
+  return `${simbolo}${monedaActual() === 'COP' ? Math.round(n) : n.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 // La API entrega 'YYYY-MM-DD HH:MM:SS' en hora local.

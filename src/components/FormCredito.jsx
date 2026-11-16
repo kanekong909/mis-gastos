@@ -148,7 +148,7 @@ export default function FormCredito({ inicial, prestadores = [], onGuardado }) {
         </div>
         <div className="campo">
           <label>% interés fijo</label>
-          <InputMonto value={form.interes_pct} onChange={set('interes_pct')} placeholder="0" />
+          <InputMonto sinConversion value={form.interes_pct} onChange={set('interes_pct')} placeholder="0" />
         </div>
       </div>
 

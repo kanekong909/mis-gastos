@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { dinero, fechaCorta, hora } from './formato';
+import { fechaTasas, monedaActual, tasaMoneda } from './moneda';
 
 const INDIGO = [79, 70, 229];
 
@@ -32,6 +33,14 @@ export function exportarGastosPDF({ titulo, subtitulo, gastos, usuario, presupue
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`${gastos.length} registro(s)`, 14, 50);
+  if (monedaActual() !== 'COP') {
+    // Los montos se guardan en pesos: se avisa con qué tasa se convirtieron.
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text(`Valores en ${monedaActual()} · 1 ${monedaActual()} = ${Math.round(tasaMoneda()).toLocaleString('es-CO')} COP (tasa del ${fechaTasas() || 'día'})`, ancho - 14, 50, { align: 'right' });
+    doc.setTextColor(30);
+    doc.setFontSize(10);
+  }
 
   // Resumen por categoría
   const porCat = {};

@@ -501,6 +501,26 @@ a { color: inherit; text-decoration: none; }
 .acento-muestra:hover { transform: scale(1.12); }
 .acento-muestra.activo { box-shadow: 0 0 0 2.5px var(--texto); }
 
+/* ---------- Selector de moneda ---------- */
+.moneda-menu { width: 280px; }
+.moneda-codigo { font-size: .72rem; font-weight: 700; margin-left: 4px; }
+.moneda-opciones { display: flex; flex-direction: column; gap: 6px; }
+.moneda-opcion {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  padding: 8px 10px; border-radius: var(--radio-sm);
+  border: 1px solid var(--borde); background: transparent; color: var(--texto);
+}
+.moneda-opcion:hover { background: var(--fondo-2, rgba(128,128,128,.1)); }
+.moneda-opcion.activo { border-color: var(--acento, currentColor); }
+.moneda-cod { font-weight: 800; font-size: .8rem; min-width: 34px; }
+.moneda-det { display: flex; flex-direction: column; flex: 1; line-height: 1.25; }
+.moneda-det b { font-size: .82rem; font-weight: 600; }
+.moneda-det small { font-size: .72rem; color: var(--texto-2); }
+.moneda-nota { font-size: .72rem; color: var(--texto-2); margin: 10px 0 0; line-height: 1.4; }
+.moneda-nota a { color: inherit; text-decoration: underline; }
+.moneda-aviso { font-size: .75rem; color: var(--peligro, #dc2626); margin: 8px 0 4px; }
+.moneda-menu .btn-link { display: inline-flex; align-items: center; gap: 4px; }
+
 /* ---------- Selector de fecha y hora ---------- */
 .fh { display: flex; flex-direction: column; gap: 12px; }
 .fh .chip { gap: 6px; }
